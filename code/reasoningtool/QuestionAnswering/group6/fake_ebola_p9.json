@@ -2,28 +2,28 @@
   "question_graph": {
     "edges": [
       {
-        "source_id": "n0",
-        "target_id": "n1",
+        "source_id": "n1",
+        "target_id": "n2",
         "id": "a"
       },
       {
-        "source_id": "n1",
-        "target_id": "n2",
+        "source_id": "n2",
+        "target_id": "n3",
         "id": "b"
       }
     ],
     "nodes": [
       {
         "curie": "MONDO:0005737",
-        "id": "n0",
+        "id": "n1",
         "type": "disease"
       },
       {
-        "id": "n1",
+        "id": "n2",
         "type": "gene"
       },
       {
-        "id": "n2",
+        "id": "n3",
         "type": "genetic_condition"
       }
     ]
@@ -3677,9 +3677,9 @@
   "answers": [
     {
       "node_bindings": {
-        "n0": "MEDDRA:10014072",
-        "n1": "HGNC:7897",
-        "n2": "MONDO:0009757"
+        "n1": "MEDDRA:10014072",
+        "n2": "HGNC:7897",
+        "n3": "MONDO:0009757"
       },
       "edge_bindings": {
         "a": [
@@ -3697,9 +3697,9 @@
     },
     {
       "node_bindings": {
-        "n0": "MONDO:0005737",
-        "n1": "HGNC:1119",
-        "n2": "MONDO:0005109"
+        "n1": "MONDO:0005737",
+        "n2": "HGNC:1119",
+        "n3": "MONDO:0005109"
       },
       "edge_bindings": {
         "a": [
@@ -3717,9 +3717,9 @@
     },
     {
       "node_bindings": {
-        "n0": "MONDO:0005737",
-        "n1": "HGNC:1119",
-        "n2": "MONDO:0009061"
+        "n1": "MONDO:0005737",
+        "n2": "HGNC:1119",
+        "n3": "MONDO:0009061"
       },
       "edge_bindings": {
         "a": [
@@ -3736,9 +3736,9 @@
     },
     {
       "node_bindings": {
-        "n0": "MONDO:0005737",
-        "n1": "HGNC:7897",
-        "n2": "MONDO:0001982"
+        "n1": "MONDO:0005737",
+        "n2": "HGNC:7897",
+        "n3": "MONDO:0001982"
       },
       "edge_bindings": {
         "a": [
@@ -3755,9 +3755,9 @@
     },
     {
       "node_bindings": {
-        "n0": "MONDO:0005737",
-        "n1": "HGNC:20818",
-        "n2": "MONDO:0004993"
+        "n1": "MONDO:0005737",
+        "n2": "HGNC:20818",
+        "n3": "MONDO:0004993"
       },
       "edge_bindings": {
         "a": [
@@ -3774,9 +3774,9 @@
     },
     {
       "node_bindings": {
-        "n0": "MONDO:0005737",
-        "n1": "HGNC:4441",
-        "n2": "MONDO:0004993"
+        "n1": "MONDO:0005737",
+        "n2": "HGNC:4441",
+        "n3": "MONDO:0004993"
       },
       "edge_bindings": {
         "a": [
@@ -3793,9 +3793,9 @@
     },
     {
       "node_bindings": {
-        "n0": "MONDO:0005737",
-        "n1": "HGNC:7897",
-        "n2": "MONDO:0017719"
+        "n1": "MONDO:0005737",
+        "n2": "HGNC:7897",
+        "n3": "MONDO:0017719"
       },
       "edge_bindings": {
         "a": [
@@ -3812,9 +3812,9 @@
     },
     {
       "node_bindings": {
-        "n0": "MONDO:0005737",
-        "n1": "HGNC:7897",
-        "n2": "MONDO:0004993"
+        "n1": "MONDO:0005737",
+        "n2": "HGNC:7897",
+        "n3": "MONDO:0004993"
       },
       "edge_bindings": {
         "a": [
@@ -3831,9 +3831,9 @@
     },
     {
       "node_bindings": {
-        "n0": "MONDO:0005737",
-        "n1": "HGNC:17770",
-        "n2": "MONDO:0004993"
+        "n1": "MONDO:0005737",
+        "n2": "HGNC:17770",
+        "n3": "MONDO:0004993"
       },
       "edge_bindings": {
         "a": [
@@ -3849,9 +3849,9 @@
     },
     {
       "node_bindings": {
-        "n0": "MONDO:0005737",
-        "n1": "HGNC:4669",
-        "n2": "MONDO:0004993"
+        "n1": "MONDO:0005737",
+        "n2": "HGNC:4669",
+        "n3": "MONDO:0004993"
       },
       "edge_bindings": {
         "a": [
@@ -3867,9 +3867,9 @@
     },
     {
       "node_bindings": {
-        "n0": "MONDO:0005737",
-        "n1": "HGNC:29249",
-        "n2": "MONDO:0004993"
+        "n1": "MONDO:0005737",
+        "n2": "HGNC:29249",
+        "n3": "MONDO:0004993"
       },
       "edge_bindings": {
         "a": [
@@ -3885,9 +3885,9 @@
     },
     {
       "node_bindings": {
-        "n0": "MONDO:0005737",
-        "n1": "HGNC:7897",
-        "n2": "MONDO:0010017"
+        "n1": "MONDO:0005737",
+        "n2": "HGNC:7897",
+        "n3": "MONDO:0010017"
       },
       "edge_bindings": {
         "a": [
@@ -3903,9 +3903,9 @@
     },
     {
       "node_bindings": {
-        "n0": "MEDDRA:10014072",
-        "n1": "HGNC:7897",
-        "n2": "MONDO:0016058"
+        "n1": "MEDDRA:10014072",
+        "n2": "HGNC:7897",
+        "n3": "MONDO:0016058"
       },
       "edge_bindings": {
         "a": [
@@ -3920,9 +3920,9 @@
     },
     {
       "node_bindings": {
-        "n0": "MONDO:0005737",
-        "n1": "HGNC:7897",
-        "n2": "MONDO:0001386"
+        "n1": "MONDO:0005737",
+        "n2": "HGNC:7897",
+        "n3": "MONDO:0001386"
       },
       "edge_bindings": {
         "a": [
@@ -3937,9 +3937,9 @@
     },
     {
       "node_bindings": {
-        "n0": "MONDO:0005737",
-        "n1": "HGNC:7897",
-        "n2": "MONDO:0008062"
+        "n1": "MONDO:0005737",
+        "n2": "HGNC:7897",
+        "n3": "MONDO:0008062"
       },
       "edge_bindings": {
         "a": [
@@ -3954,9 +3954,9 @@
     },
     {
       "node_bindings": {
-        "n0": "MONDO:0005737",
-        "n1": "HGNC:7897",
-        "n2": "MONDO:0015597"
+        "n1": "MONDO:0005737",
+        "n2": "HGNC:7897",
+        "n3": "MONDO:0015597"
       },
       "edge_bindings": {
         "a": [
@@ -3972,9 +3972,9 @@
     },
     {
       "node_bindings": {
-        "n0": "MONDO:0005737",
-        "n1": "HGNC:1119",
-        "n2": "MONDO:0015597"
+        "n1": "MONDO:0005737",
+        "n2": "HGNC:1119",
+        "n3": "MONDO:0015597"
       },
       "edge_bindings": {
         "a": [
@@ -3990,9 +3990,9 @@
     },
     {
       "node_bindings": {
-        "n0": "MONDO:0005737",
-        "n1": "HGNC:13236",
-        "n2": "MONDO:0004993"
+        "n1": "MONDO:0005737",
+        "n2": "HGNC:13236",
+        "n3": "MONDO:0004993"
       },
       "edge_bindings": {
         "a": [
@@ -4008,9 +4008,9 @@
     },
     {
       "node_bindings": {
-        "n0": "MONDO:0005737",
-        "n1": "HGNC:16361",
-        "n2": "MONDO:0019200"
+        "n1": "MONDO:0005737",
+        "n2": "HGNC:16361",
+        "n3": "MONDO:0019200"
       },
       "edge_bindings": {
         "a": [
@@ -4026,9 +4026,9 @@
     },
     {
       "node_bindings": {
-        "n0": "MONDO:0005737",
-        "n1": "HGNC:7897",
-        "n2": "MONDO:0011719"
+        "n1": "MONDO:0005737",
+        "n2": "HGNC:7897",
+        "n3": "MONDO:0011719"
       },
       "edge_bindings": {
         "a": [
@@ -4044,9 +4044,9 @@
     },
     {
       "node_bindings": {
-        "n0": "MONDO:0005737",
-        "n1": "HGNC:30922",
-        "n2": "MONDO:0004993"
+        "n1": "MONDO:0005737",
+        "n2": "HGNC:30922",
+        "n3": "MONDO:0004993"
       },
       "edge_bindings": {
         "a": [
@@ -4061,9 +4061,9 @@
     },
     {
       "node_bindings": {
-        "n0": "MONDO:0005737",
-        "n1": "HGNC:16361",
-        "n2": "MONDO:0004993"
+        "n1": "MONDO:0005737",
+        "n2": "HGNC:16361",
+        "n3": "MONDO:0004993"
       },
       "edge_bindings": {
         "a": [
@@ -4078,9 +4078,9 @@
     },
     {
       "node_bindings": {
-        "n0": "MONDO:0005737",
-        "n1": "HGNC:13415",
-        "n2": "MONDO:0015597"
+        "n1": "MONDO:0005737",
+        "n2": "HGNC:13415",
+        "n3": "MONDO:0015597"
       },
       "edge_bindings": {
         "a": [
@@ -4095,9 +4095,9 @@
     },
     {
       "node_bindings": {
-        "n0": "MONDO:0005737",
-        "n1": "HGNC:17770",
-        "n2": "MONDO:0015597"
+        "n1": "MONDO:0005737",
+        "n2": "HGNC:17770",
+        "n3": "MONDO:0015597"
       },
       "edge_bindings": {
         "a": [
@@ -4112,9 +4112,9 @@
     },
     {
       "node_bindings": {
-        "n0": "MONDO:0005737",
-        "n1": "HGNC:24867",
-        "n2": "MONDO:0015597"
+        "n1": "MONDO:0005737",
+        "n2": "HGNC:24867",
+        "n3": "MONDO:0015597"
       },
       "edge_bindings": {
         "a": [
@@ -4129,9 +4129,9 @@
     },
     {
       "node_bindings": {
-        "n0": "MONDO:0005737",
-        "n1": "HGNC:16361",
-        "n2": "MONDO:0015597"
+        "n1": "MONDO:0005737",
+        "n2": "HGNC:16361",
+        "n3": "MONDO:0015597"
       },
       "edge_bindings": {
         "a": [
@@ -4146,9 +4146,9 @@
     },
     {
       "node_bindings": {
-        "n0": "MONDO:0005737",
-        "n1": "HGNC:1119",
-        "n2": "MONDO:0005615"
+        "n1": "MONDO:0005737",
+        "n2": "HGNC:1119",
+        "n3": "MONDO:0005615"
       },
       "edge_bindings": {
         "a": [
@@ -4165,9 +4165,9 @@
     },
     {
       "node_bindings": {
-        "n0": "MONDO:0005737",
-        "n1": "HGNC:1119",
-        "n2": "MONDO:0007959"
+        "n1": "MONDO:0005737",
+        "n2": "HGNC:1119",
+        "n3": "MONDO:0007959"
       },
       "edge_bindings": {
         "a": [
@@ -4183,9 +4183,9 @@
     },
     {
       "node_bindings": {
-        "n0": "MONDO:0005737",
-        "n1": "HGNC:1119",
-        "n2": "MONDO:0002791"
+        "n1": "MONDO:0005737",
+        "n2": "HGNC:1119",
+        "n3": "MONDO:0002791"
       },
       "edge_bindings": {
         "a": [
@@ -4201,9 +4201,9 @@
     },
     {
       "node_bindings": {
-        "n0": "MONDO:0005737",
-        "n1": "HGNC:1119",
-        "n2": "MONDO:0005028"
+        "n1": "MONDO:0005737",
+        "n2": "HGNC:1119",
+        "n3": "MONDO:0005028"
       },
       "edge_bindings": {
         "a": [
@@ -4219,9 +4219,9 @@
     },
     {
       "node_bindings": {
-        "n0": "MONDO:0005737",
-        "n1": "HGNC:16361",
-        "n2": "MONDO:0012662"
+        "n1": "MONDO:0005737",
+        "n2": "HGNC:16361",
+        "n3": "MONDO:0012662"
       },
       "edge_bindings": {
         "a": [
@@ -4237,9 +4237,9 @@
     },
     {
       "node_bindings": {
-        "n0": "MONDO:0005737",
-        "n1": "HGNC:30922",
-        "n2": "MONDO:0013702"
+        "n1": "MONDO:0005737",
+        "n2": "HGNC:30922",
+        "n3": "MONDO:0013702"
       },
       "edge_bindings": {
         "a": [
@@ -4254,9 +4254,9 @@
     },
     {
       "node_bindings": {
-        "n0": "MONDO:0005737",
-        "n1": "HGNC:16361",
-        "n2": "MONDO:0016484"
+        "n1": "MONDO:0005737",
+        "n2": "HGNC:16361",
+        "n3": "MONDO:0016484"
       },
       "edge_bindings": {
         "a": [
@@ -4272,9 +4272,9 @@
     },
     {
       "node_bindings": {
-        "n0": "MONDO:0005737",
-        "n1": "HGNC:17770",
-        "n2": "MONDO:0008947"
+        "n1": "MONDO:0005737",
+        "n2": "HGNC:17770",
+        "n3": "MONDO:0008947"
       },
       "edge_bindings": {
         "a": [
@@ -4290,9 +4290,9 @@
     },
     {
       "node_bindings": {
-        "n0": "MONDO:0005737",
-        "n1": "HGNC:7897",
-        "n2": "MONDO:0018150"
+        "n1": "MONDO:0005737",
+        "n2": "HGNC:7897",
+        "n3": "MONDO:0018150"
       },
       "edge_bindings": {
         "a": [
@@ -4308,9 +4308,9 @@
     },
     {
       "node_bindings": {
-        "n0": "MONDO:0005737",
-        "n1": "HGNC:1119",
-        "n2": "MONDO:0009693"
+        "n1": "MONDO:0005737",
+        "n2": "HGNC:1119",
+        "n3": "MONDO:0009693"
       },
       "edge_bindings": {
         "a": [
@@ -4326,9 +4326,9 @@
     },
     {
       "node_bindings": {
-        "n0": "MONDO:0005737",
-        "n1": "HGNC:24867",
-        "n2": "MONDO:0008449"
+        "n1": "MONDO:0005737",
+        "n2": "HGNC:24867",
+        "n3": "MONDO:0008449"
       },
       "edge_bindings": {
         "a": [
@@ -4343,9 +4343,9 @@
     },
     {
       "node_bindings": {
-        "n0": "MONDO:0005737",
-        "n1": "HGNC:30922",
-        "n2": "MONDO:0019502"
+        "n1": "MONDO:0005737",
+        "n2": "HGNC:30922",
+        "n3": "MONDO:0019502"
       },
       "edge_bindings": {
         "a": [
@@ -4360,9 +4360,9 @@
     },
     {
       "node_bindings": {
-        "n0": "MONDO:0005737",
-        "n1": "HGNC:17770",
-        "n2": "MONDO:0008243"
+        "n1": "MONDO:0005737",
+        "n2": "HGNC:17770",
+        "n3": "MONDO:0008243"
       },
       "edge_bindings": {
         "a": [
@@ -4377,9 +4377,9 @@
     },
     {
       "node_bindings": {
-        "n0": "MONDO:0005737",
-        "n1": "HGNC:24867",
-        "n2": "MONDO:0007959"
+        "n1": "MONDO:0005737",
+        "n2": "HGNC:24867",
+        "n3": "MONDO:0007959"
       },
       "edge_bindings": {
         "a": [
@@ -4394,9 +4394,9 @@
     },
     {
       "node_bindings": {
-        "n0": "MONDO:0005737",
-        "n1": "HGNC:4669",
-        "n2": "MONDO:0010383"
+        "n1": "MONDO:0005737",
+        "n2": "HGNC:4669",
+        "n3": "MONDO:0010383"
       },
       "edge_bindings": {
         "a": [
@@ -4411,9 +4411,9 @@
     },
     {
       "node_bindings": {
-        "n0": "MONDO:0005737",
-        "n1": "HGNC:20818",
-        "n2": "MONDO:0019262"
+        "n1": "MONDO:0005737",
+        "n2": "HGNC:20818",
+        "n3": "MONDO:0019262"
       },
       "edge_bindings": {
         "a": [
@@ -4428,9 +4428,9 @@
     },
     {
       "node_bindings": {
-        "n0": "MONDO:0005737",
-        "n1": "HGNC:7897",
-        "n2": "MONDO:0016308"
+        "n1": "MONDO:0005737",
+        "n2": "HGNC:7897",
+        "n3": "MONDO:0016308"
       },
       "edge_bindings": {
         "a": [
@@ -4445,9 +4445,9 @@
     },
     {
       "node_bindings": {
-        "n0": "MONDO:0005737",
-        "n1": "HGNC:7897",
-        "n2": "MONDO:0007959"
+        "n1": "MONDO:0005737",
+        "n2": "HGNC:7897",
+        "n3": "MONDO:0007959"
       },
       "edge_bindings": {
         "a": [
@@ -4462,9 +4462,9 @@
     },
     {
       "node_bindings": {
-        "n0": "MONDO:0005737",
-        "n1": "HGNC:7897",
-        "n2": "MONDO:0016306"
+        "n1": "MONDO:0005737",
+        "n2": "HGNC:7897",
+        "n3": "MONDO:0016306"
       },
       "edge_bindings": {
         "a": [
@@ -4479,9 +4479,9 @@
     },
     {
       "node_bindings": {
-        "n0": "MONDO:0005737",
-        "n1": "HGNC:7897",
-        "n2": "MONDO:0020380"
+        "n1": "MONDO:0005737",
+        "n2": "HGNC:7897",
+        "n3": "MONDO:0020380"
       },
       "edge_bindings": {
         "a": [
@@ -4496,9 +4496,9 @@
     },
     {
       "node_bindings": {
-        "n0": "MONDO:0005737",
-        "n1": "HGNC:7897",
-        "n2": "MONDO:0002791"
+        "n1": "MONDO:0005737",
+        "n2": "HGNC:7897",
+        "n3": "MONDO:0002791"
       },
       "edge_bindings": {
         "a": [
@@ -4513,9 +4513,9 @@
     },
     {
       "node_bindings": {
-        "n0": "MONDO:0005737",
-        "n1": "HGNC:7897",
-        "n2": "MONDO:0016307"
+        "n1": "MONDO:0005737",
+        "n2": "HGNC:7897",
+        "n3": "MONDO:0016307"
       },
       "edge_bindings": {
         "a": [
@@ -4530,9 +4530,9 @@
     },
     {
       "node_bindings": {
-        "n0": "MONDO:0005737",
-        "n1": "HGNC:7897",
-        "n2": "MONDO:0016309"
+        "n1": "MONDO:0005737",
+        "n2": "HGNC:7897",
+        "n3": "MONDO:0016309"
       },
       "edge_bindings": {
         "a": [
@@ -4547,9 +4547,9 @@
     },
     {
       "node_bindings": {
-        "n0": "MONDO:0005737",
-        "n1": "HGNC:7897",
-        "n2": "MONDO:0016310"
+        "n1": "MONDO:0005737",
+        "n2": "HGNC:7897",
+        "n3": "MONDO:0016310"
       },
       "edge_bindings": {
         "a": [
@@ -4564,9 +4564,9 @@
     },
     {
       "node_bindings": {
-        "n0": "MONDO:0005737",
-        "n1": "HGNC:7897",
-        "n2": "MONDO:0005181"
+        "n1": "MONDO:0005737",
+        "n2": "HGNC:7897",
+        "n3": "MONDO:0005181"
       },
       "edge_bindings": {
         "a": [
@@ -4581,9 +4581,9 @@
     },
     {
       "node_bindings": {
-        "n0": "MONDO:0005737",
-        "n1": "HGNC:7897",
-        "n2": "MONDO:0008608"
+        "n1": "MONDO:0005737",
+        "n2": "HGNC:7897",
+        "n3": "MONDO:0008608"
       },
       "edge_bindings": {
         "a": [
@@ -4598,9 +4598,9 @@
     },
     {
       "node_bindings": {
-        "n0": "MONDO:0005737",
-        "n1": "HGNC:16361",
-        "n2": "MONDO:0019501"
+        "n1": "MONDO:0005737",
+        "n2": "HGNC:16361",
+        "n3": "MONDO:0019501"
       },
       "edge_bindings": {
         "a": [
@@ -4615,9 +4615,9 @@
     },
     {
       "node_bindings": {
-        "n0": "MONDO:0005737",
-        "n1": "HGNC:16361",
-        "n2": "MONDO:0011767"
+        "n1": "MONDO:0005737",
+        "n2": "HGNC:16361",
+        "n3": "MONDO:0011767"
       },
       "edge_bindings": {
         "a": [
@@ -4632,9 +4632,9 @@
     },
     {
       "node_bindings": {
-        "n0": "MONDO:0005737",
-        "n1": "HGNC:16361",
-        "n2": "MONDO:0017312"
+        "n1": "MONDO:0005737",
+        "n2": "HGNC:16361",
+        "n3": "MONDO:0017312"
       },
       "edge_bindings": {
         "a": [
@@ -4649,9 +4649,9 @@
     },
     {
       "node_bindings": {
-        "n0": "MONDO:0005737",
-        "n1": "HGNC:13236",
-        "n2": "MONDO:0009693"
+        "n1": "MONDO:0005737",
+        "n2": "HGNC:13236",
+        "n3": "MONDO:0009693"
       },
       "edge_bindings": {
         "a": [
@@ -4666,9 +4666,9 @@
     },
     {
       "node_bindings": {
-        "n0": "MONDO:0005737",
-        "n1": "HGNC:16361",
-        "n2": "MONDO:0019588"
+        "n1": "MONDO:0005737",
+        "n2": "HGNC:16361",
+        "n3": "MONDO:0019588"
       },
       "edge_bindings": {
         "a": [
@@ -4682,9 +4682,9 @@
     },
     {
       "node_bindings": {
-        "n0": "MONDO:0005737",
-        "n1": "HGNC:30922",
-        "n2": "MONDO:0007959"
+        "n1": "MONDO:0005737",
+        "n2": "HGNC:30922",
+        "n3": "MONDO:0007959"
       },
       "edge_bindings": {
         "a": [
@@ -4698,9 +4698,9 @@
     },
     {
       "node_bindings": {
-        "n0": "MONDO:0005737",
-        "n1": "HGNC:13236",
-        "n2": "MONDO:0007959"
+        "n1": "MONDO:0005737",
+        "n2": "HGNC:13236",
+        "n3": "MONDO:0007959"
       },
       "edge_bindings": {
         "a": [
@@ -4714,9 +4714,9 @@
     },
     {
       "node_bindings": {
-        "n0": "MONDO:0005737",
-        "n1": "HGNC:16361",
-        "n2": "MONDO:0010576"
+        "n1": "MONDO:0005737",
+        "n2": "HGNC:16361",
+        "n3": "MONDO:0010576"
       },
       "edge_bindings": {
         "a": [
@@ -4730,9 +4730,9 @@
     },
     {
       "node_bindings": {
-        "n0": "MONDO:0005737",
-        "n1": "HGNC:30922",
-        "n2": "MONDO:0008243"
+        "n1": "MONDO:0005737",
+        "n2": "HGNC:30922",
+        "n3": "MONDO:0008243"
       },
       "edge_bindings": {
         "a": [
@@ -4746,9 +4746,9 @@
     },
     {
       "node_bindings": {
-        "n0": "MONDO:0005737",
-        "n1": "HGNC:20818",
-        "n2": "MONDO:0005340"
+        "n1": "MONDO:0005737",
+        "n2": "HGNC:20818",
+        "n3": "MONDO:0005340"
       },
       "edge_bindings": {
         "a": [
@@ -4762,9 +4762,9 @@
     },
     {
       "node_bindings": {
-        "n0": "MONDO:0005737",
-        "n1": "HGNC:17770",
-        "n2": "MONDO:0008345"
+        "n1": "MONDO:0005737",
+        "n2": "HGNC:17770",
+        "n3": "MONDO:0008345"
       },
       "edge_bindings": {
         "a": [
@@ -4778,9 +4778,9 @@
     },
     {
       "node_bindings": {
-        "n0": "MONDO:0005737",
-        "n1": "HGNC:13236",
-        "n2": "MONDO:0005615"
+        "n1": "MONDO:0005737",
+        "n2": "HGNC:13236",
+        "n3": "MONDO:0005615"
       },
       "edge_bindings": {
         "a": [
@@ -4794,9 +4794,9 @@
     },
     {
       "node_bindings": {
-        "n0": "MONDO:0005737",
-        "n1": "HGNC:24867",
-        "n2": "MONDO:0019351"
+        "n1": "MONDO:0005737",
+        "n2": "HGNC:24867",
+        "n3": "MONDO:0019351"
       },
       "edge_bindings": {
         "a": [
@@ -4810,9 +4810,9 @@
     },
     {
       "node_bindings": {
-        "n0": "MONDO:0005737",
-        "n1": "HGNC:30922",
-        "n2": "MONDO:0019351"
+        "n1": "MONDO:0005737",
+        "n2": "HGNC:30922",
+        "n3": "MONDO:0019351"
       },
       "edge_bindings": {
         "a": [
@@ -4826,9 +4826,9 @@
     },
     {
       "node_bindings": {
-        "n0": "MONDO:0005737",
-        "n1": "HGNC:30922",
-        "n2": "MONDO:0008449"
+        "n1": "MONDO:0005737",
+        "n2": "HGNC:30922",
+        "n3": "MONDO:0008449"
       },
       "edge_bindings": {
         "a": [
@@ -4842,9 +4842,9 @@
     },
     {
       "node_bindings": {
-        "n0": "MONDO:0005737",
-        "n1": "HGNC:24867",
-        "n2": "MONDO:0005100"
+        "n1": "MONDO:0005737",
+        "n2": "HGNC:24867",
+        "n3": "MONDO:0005100"
       },
       "edge_bindings": {
         "a": [
@@ -4858,9 +4858,9 @@
     },
     {
       "node_bindings": {
-        "n0": "MONDO:0005737",
-        "n1": "HGNC:16361",
-        "n2": "MONDO:0011080"
+        "n1": "MONDO:0005737",
+        "n2": "HGNC:16361",
+        "n3": "MONDO:0011080"
       },
       "edge_bindings": {
         "a": [
@@ -4874,9 +4874,9 @@
     },
     {
       "node_bindings": {
-        "n0": "MONDO:0005737",
-        "n1": "HGNC:16361",
-        "n2": "MONDO:0002791"
+        "n1": "MONDO:0005737",
+        "n2": "HGNC:16361",
+        "n3": "MONDO:0002791"
       },
       "edge_bindings": {
         "a": [
@@ -4890,9 +4890,9 @@
     },
     {
       "node_bindings": {
-        "n0": "MONDO:0005737",
-        "n1": "HGNC:17770",
-        "n2": "MONDO:0024538"
+        "n1": "MONDO:0005737",
+        "n2": "HGNC:17770",
+        "n3": "MONDO:0024538"
       },
       "edge_bindings": {
         "a": [
@@ -4906,9 +4906,9 @@
     },
     {
       "node_bindings": {
-        "n0": "MONDO:0005737",
-        "n1": "HGNC:16361",
-        "n2": "MONDO:0000455"
+        "n1": "MONDO:0005737",
+        "n2": "HGNC:16361",
+        "n3": "MONDO:0000455"
       },
       "edge_bindings": {
         "a": [
@@ -4922,9 +4922,9 @@
     },
     {
       "node_bindings": {
-        "n0": "MONDO:0005737",
-        "n1": "HGNC:30922",
-        "n2": "MONDO:0019037"
+        "n1": "MONDO:0005737",
+        "n2": "HGNC:30922",
+        "n3": "MONDO:0019037"
       },
       "edge_bindings": {
         "a": [
@@ -4938,9 +4938,9 @@
     },
     {
       "node_bindings": {
-        "n0": "MONDO:0005737",
-        "n1": "HGNC:13236",
-        "n2": "MONDO:0013674"
+        "n1": "MONDO:0005737",
+        "n2": "HGNC:13236",
+        "n3": "MONDO:0013674"
       },
       "edge_bindings": {
         "a": [
@@ -4954,9 +4954,9 @@
     },
     {
       "node_bindings": {
-        "n0": "MONDO:0005737",
-        "n1": "HGNC:16361",
-        "n2": "MONDO:0008243"
+        "n1": "MONDO:0005737",
+        "n2": "HGNC:16361",
+        "n3": "MONDO:0008243"
       },
       "edge_bindings": {
         "a": [
@@ -4970,9 +4970,9 @@
     },
     {
       "node_bindings": {
-        "n0": "MONDO:0005737",
-        "n1": "HGNC:16361",
-        "n2": "MONDO:0019497"
+        "n1": "MONDO:0005737",
+        "n2": "HGNC:16361",
+        "n3": "MONDO:0019497"
       },
       "edge_bindings": {
         "a": [
@@ -4986,9 +4986,9 @@
     },
     {
       "node_bindings": {
-        "n0": "MONDO:0005737",
-        "n1": "HGNC:16361",
-        "n2": "MONDO:0007959"
+        "n1": "MONDO:0005737",
+        "n2": "HGNC:16361",
+        "n3": "MONDO:0007959"
       },
       "edge_bindings": {
         "a": [
