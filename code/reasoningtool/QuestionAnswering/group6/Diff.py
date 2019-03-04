@@ -22,7 +22,8 @@ class Diff():
 	def same_query_plan_types(self):
 		"""
 		Check if both the inputs are using the same query plan where "same" is defined to be as going through the same
-		node types, with the same edge directions
+		node types, with the same edge directions. I.e. are the query plans isomorphic, where nodes are considered
+		identical if they have the same type. Note: this will say some plans are the same when they really aren't
 		:return: Boolean
 		"""
 		if self.input1 is None or self.input2 is None:
@@ -46,9 +47,23 @@ class Diff():
 
 		return nx.is_isomorphic(g1, g2, node_match=lambda x, y: x['type'] == y['type'])
 
+	def same_node_types(self, node1, node2):
+		"""
+		Checks if two nodes (one from each response) are of the same type according to their respective query plans
+		:param node1: a node_binding key
+		:param node2: a node_binding key
+		:return: Boolean
+		"""
+		if self.input1 is None or self.input2 is None:
+			raise Exception("Missing input: please run the populate() method first")
+		# TODO finsih it
+		return self.input1['question_graph']['nodes'][node1] == self.input2['question_graph']['nodes'][node2]
 
 
 
+
+################################################
+# Brief error checking
 def same_query_plan_types():
 	d = Diff()
 	d.populate(open('gamma_ebola_p9.json', 'r'), open('fake_ebola_p9.json', 'r'))
@@ -57,3 +72,11 @@ def same_query_plan_types():
 
 def run_tests():
 	same_query_plan_types()
+
+
+
+#######################################################3
+# Testing
+d = Diff()
+d.populate(open('gamma_ebola_p9.json', 'r'), open('fake_ebola_p9.json', 'r'))
+d.same_node_types('n0', 'n0')
