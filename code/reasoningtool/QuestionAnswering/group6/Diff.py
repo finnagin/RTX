@@ -22,7 +22,7 @@ class Diff():
 	def same_query_plan_types(self):
 		"""
 		Check if both the inputs are using the same query plan where "same" is defined to be as going through the same
-		node types along the same edge types
+		node types, with the same edge directions
 		:return: Boolean
 		"""
 		if self.input1 is None or self.input2 is None:
@@ -44,4 +44,16 @@ class Diff():
 		for edge in self.input2['question_graph']['edges']:
 			g2.add_edge(edge['source_id'], edge['target_id'])
 
-		return nx.is_isomorphic(g1, g2, node_match='type')
+		return nx.is_isomorphic(g1, g2, node_match=lambda x, y: x['type'] == y['type'])
+
+
+
+
+def same_query_plan_types():
+	d = Diff()
+	d.populate(open('gamma_ebola_p9.json', 'r'), open('fake_ebola_p9.json', 'r'))
+	assert d.same_query_plan_types()
+
+
+def run_tests():
+	same_query_plan_types()
