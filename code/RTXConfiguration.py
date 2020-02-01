@@ -1,5 +1,4 @@
 #!/usr/bin/python3
-
 import re
 import os
 import sys
@@ -8,23 +7,37 @@ import json
 import time
 
 class RTXConfiguration:
-
     #### Constructor
     def __init__(self):
         self.version = "RTX 0.5.4"
 
         file_path = os.path.dirname(os.path.abspath(__file__)) + '/config.json'
+        print(file_path)
 
         if not os.path.exists(file_path):
             # scp the file
-            os.system("scp rtxconfig@rtx.ncats.io:/mnt/temp/config.json " + file_path)
+            code = os.system("scp rtxconfig@rtx.ncats.io:/mnt/temp/config.json " + file_path)
+            # added error handling if you don't have permission
+            # so code doesn't fail silently
+            if code == 256:
+                print("You don't have permission to access the server.")
+                print("You must generate a rsa public / private key-pair first via your system's terminal.")
+                print("Then, hand the public key to the Server Admin")
+                sys.exit()
         else:
             now_time = datetime.datetime.now()
             modified_time = time.localtime(os.stat(file_path).st_mtime)
             modified_time = datetime.datetime(*modified_time[:6])
             if (now_time - modified_time).days > 0:
                 # scp the file
-                os.system("scp rtxconfig@rtx.ncats.io:/mnt/temp/config.json " + file_path)
+                code = os.system("scp rtxconfig@rtx.ncats.io:/mnt/temp/config.json " + file_path)
+                # added error handling if you don't have permission
+                # so code doesn't fail silently
+                if code == 256:
+                    print("You don't have permission to access the server.")
+                    print("You must generate a rsa public / private key-pair first via your system's terminal.")
+                    print("Then, hand the public key to the Server Admin")
+                    sys.exit()
 
         f = open(file_path, 'r')
         config_data = f.read()

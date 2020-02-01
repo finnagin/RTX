@@ -28,9 +28,7 @@ from QueryMyChem import QueryMyChem
 
 # requests_cache.install_cache('NGDCache')
 
-
 class NormGoogleDistance:
-
     @staticmethod
     @CachedMethods.register
     def query_oxo(uid):
@@ -39,7 +37,6 @@ class NormGoogleDistance:
         """
         url_str = 'https://www.ebi.ac.uk/spot/oxo/api/mappings?fromId=' + str(uid)
         requests = CacheControlHelper()
-
         try:
             res = requests.get(url_str, headers={'accept': 'application/json'}, timeout=120)
         except requests.exceptions.Timeout:
@@ -55,7 +52,6 @@ class NormGoogleDistance:
             print('HTTP response status code: ' + str(status_code) + ' for URL:\n' + url_str, file=sys.stderr)
             res = None
         return res
-
     @staticmethod
     @CachedMethods.register
     def get_mesh_from_oxo(curie_id):
@@ -63,6 +59,7 @@ class NormGoogleDistance:
             curie_id = str(curie_id)
         if curie_id.startswith('REACT:'):
             curie_id = curie_id.replace('REACT', 'Reactome')
+        # TODO: Cache the res into something useful?
         res = NormGoogleDistance.query_oxo(curie_id)
         mesh_ids=None
         if res is not None:
@@ -72,6 +69,8 @@ class NormGoogleDistance:
             if int(n_res) > 0:
                 mappings = res['_embedded']['mappings']
                 for mapping in mappings:
+                    # TODO: Lots of splitting and set operations here;
+                    # maybe try to optimize this part?
                     if mapping['fromTerm']['curie'].startswith('MeSH'):
                         mesh_ids |= set([mapping['fromTerm']['curie'].split(':')[1]])
                     elif mapping['toTerm']['curie'].startswith('UMLS'):
@@ -82,6 +81,13 @@ class NormGoogleDistance:
                 mesh_ids = list(mesh_ids)
         return mesh_ids
 
+
+    #TODO: Might Want to focus on caching and optimization
+    # of this method.
+
+    # Identiy ambiguity problem; gene id not match
+    # with specific mesh term, and find synonym
+    # id....
     @staticmethod
     @CachedMethods.register
     def get_mesh_term_for_all(curie_id, description):
@@ -106,44 +112,58 @@ class NormGoogleDistance:
             description = str(description)
         curie_list = curie_id.split(':')
         names = None
+
         if QueryNCBIeUtils.is_mesh_term(description):
             return [description + '[MeSH Terms]']
+        # convert curie_id to cui
         names = NormGoogleDistance.get_mesh_from_oxo(curie_id)
         if names is None:
             if curie_list[0].lower().startswith("react"):
+                # CAN'T DO THIS LOCALLY
                 res = QueryNCBIeUtils.get_reactome_names(curie_list[1])
                 if res is not None:
                     names = res.split('|')
             elif curie_list[0] == "GO":
                 pass
             elif curie_list[0].startswith("UniProt"):
+                # CAN'T DO THIS LOCALLY
                 res = QueryNCBIeUtils.get_uniprot_names(curie_list[1])
                 if res is not None:
                     names = res.split('|')
             elif curie_list[0] == "HP":
+                # CAN'T DO THIS LOCALLY
                 names = QueryNCBIeUtils.get_mesh_terms_for_hp_id(curie_id)
             elif curie_list[0] == "UBERON":
                 if curie_id.endswith('PHENOTYPE'):
                     curie_id = curie_id[:-9]
+                # CAN'T DO THIS LOCALLY
                 mesh_id = QueryEBIOLS.get_mesh_id_for_uberon_id(curie_id)
                 names = []
                 for entry in mesh_id:
                     if len(entry.split('.')) > 1:
+                        # TODO: Reduce the number of queries here?
                         uids=QueryNCBIeUtils.get_mesh_uids_for_mesh_tree(entry.split(':')[1])
+                        # Cache all mesh terms from xml files
+                        # and simply replace get_mesh_terms_for_mesh_uid
+                        # with our own function
                         for uid in uids:
                             try:
                                 uid_num = int(uid.split(':')[1][1:]) + 68000000
+                                # CAN DO THIS LOCALLY
                                 names += QueryNCBIeUtils.get_mesh_terms_for_mesh_uid(uid_num)
                             except IndexError:
                                 uid_num = int(uid)
+                                # CAN DO THIS LOCALLY
                                 names += QueryNCBIeUtils.get_mesh_terms_for_mesh_uid(uid_num)
                     else:
                         try:
                             uid = entry.split(':')[1]
                             uid_num = int(uid[1:]) + 68000000
+                            # CAN DO THIS LOCALLY
                             names += QueryNCBIeUtils.get_mesh_terms_for_mesh_uid(uid_num)
                         except IndexError:
                             uid_num = int(entry)
+                            # CAN DO THIS LOCALLY
                             names += QueryNCBIeUtils.get_mesh_terms_for_mesh_uid(uid_num)
                 if len(names) == 0:
                     names = None
@@ -151,12 +171,15 @@ class NormGoogleDistance:
                     names[0] = names[0] + '[MeSH Terms]'
             elif curie_list[0] == "NCBIGene":
                 gene_id = curie_id.split(':')[1]
+                # CAN  DO THIS LOCALLY
                 names = QueryNCBIeUtils.get_pubmed_from_ncbi_gene(gene_id)
             elif curie_list[0] == "DOID":
+                # Can't do this locally
                 mesh_id = QueryDisont.query_disont_to_mesh_id(curie_id)
                 names = []
                 for uid in mesh_id:
                     uid_num = int(uid[1:]) + 68000000
+                    # CAN  DO THIS LOCALLY
                     name = QueryNCBIeUtils.get_mesh_terms_for_mesh_uid(uid_num)
                     if name is not None:
                         names += name
@@ -165,12 +188,15 @@ class NormGoogleDistance:
                 else:
                     names[0] = names[0] + '[MeSH Terms]'
             elif curie_list[0] == "OMIM":
+                # Can't do it locally
                 names = QueryNCBIeUtils.get_mesh_terms_for_omim_id(curie_list[1])
             elif curie_list[0] == "ChEMBL":
                 chembl_id = curie_id.replace(':', '').upper()
+                # Can't do it locally
                 mesh_id = QueryMyChem.get_mesh_id(chembl_id)
                 if mesh_id is not None:
                     mesh_id = int(mesh_id[1:]) + 68000000
+                    # Can Do Locally
                     names = QueryNCBIeUtils.get_mesh_terms_for_mesh_uid(mesh_id)
         if names is not None:
             if type(names) == list:
@@ -182,7 +208,7 @@ class NormGoogleDistance:
 
     @staticmethod
     # @CachedMethods.register
-    def get_ngd_for_all(curie_id_list, description_list):
+    def get_ngd_for_all(curie_id_list, description_list, uid_dict=None, pmid_mesh_dict=None):
         """
         Takes a list of currie ids and descriptions then calculates the normalized google distance for the set of nodes.
         Params:
@@ -205,6 +231,7 @@ class NormGoogleDistance:
             if len(terms[a]) > 1:
                 if not terms[a][0].endswith('[uid]'):
                     for b in range(len(terms[a])):
+                        # can do this locally
                         if QueryNCBIeUtils.is_mesh_term(terms[a][b]) and not terms[a][b].endswith('[MeSH Terms]'):
                             terms[a][b] += '[MeSH Terms]'
                 terms_combined[a] = '|'.join(terms[a])
@@ -213,6 +240,7 @@ class NormGoogleDistance:
                 terms_combined[a] = terms[a][0]
                 if terms[a][0].endswith('[MeSH Terms]'):
                     terms_combined[a] = terms[a][0][:-12]
+                # can do this locally
                 elif not QueryNCBIeUtils.is_mesh_term(terms[a][0]):
                     mesh_flags[a] = False
         ngd = QueryNCBIeUtils.multi_normalized_google_distance(terms_combined, mesh_flags)
@@ -241,7 +269,6 @@ class NormGoogleDistance:
                 response['response_code'] = "OK"
                 response['value'] = value
         return response
-
 
 if __name__ == '__main__':
     pass

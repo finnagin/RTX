@@ -15,6 +15,10 @@ from itertools import islice
 import itertools
 import functools
 import CustomExceptions
+
+#sys.path.append('../../dan_work/improved_ngd_comp')
+#from XMLExtractor import XMLExtractor
+
 try:
     from QueryCOHD import QueryCOHD
 except ImportError:
@@ -795,7 +799,6 @@ def count_nodes_of_type_for_nodes_that_connect_to_label(source_name, source_labe
             names2counts[i['t.id']] = int(i['count(distinct n.id)'])
         return names2counts
 
-
 def interleave_nodes_and_relationships(session, source_node, source_node_label, target_node, target_node_label, max_path_len=3, debug=False):
     """
     Given fixed source source_node and fixed target target_node, returns a list consiting of the types of relationships and nodes
@@ -927,9 +930,13 @@ def weight_graph_with_google_distance(g, context_node_id=None, context_node_desc
         target_descr = descriptions[edge[1]]
         gd = np.inf
         if context_node_id is not None and context_node_descr is not None:
-            gd_temp = NormGoogleDistance.get_ngd_for_all([source_id, target_id, context_node_id], [source_descr, target_descr, context_node_descr])
+            gd_temp = NormGoogleDistance.get_ngd_for_all([source_id, target_id, context_node_id], \
+                                                         [source_descr, target_descr, context_node_descr], \
+                                                         uid_dict, pmid_mesh_dict)
         else:
-            gd_temp = NormGoogleDistance.get_ngd_for_all([source_id, target_id], [source_descr, target_descr])
+            gd_temp = NormGoogleDistance.get_ngd_for_all([source_id, target_id], \
+                                                         [source_descr, target_descr], \
+                                                         uid_dict, pmid_mesh_dict)
         if not np.isnan(gd_temp):
             if gd_temp < gd:
                 gd = gd_temp
@@ -1590,7 +1597,7 @@ def does_connect(source_list, source_type, target_type):
     :param source_list: list of ids
     :param source_type: label for node of elements in list
     :param target_type: label for node of target
-    :return: 
+    :return:
     """
     query = "MATCH (s:%s)-[]-(t:%s)" \
             " WHERE s.id in %s return count(t)" % (

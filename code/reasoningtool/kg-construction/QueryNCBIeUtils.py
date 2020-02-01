@@ -22,6 +22,9 @@ from cache_control_helper import CacheControlHelper
 
 # requests_cache.install_cache('QueryNCBIeUtilsCache')
 import numpy
+import time
+
+import sys
 
 # MeSH Terms for Q1 diseases: (see git/q1/README.md)
 #   Osteoporosis
@@ -51,10 +54,10 @@ class QueryNCBIeUtils:
     API_BASE_URL = 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils'
 
     '''runs a query against eUtils (hard-coded for JSON response) and returns the results as a ``requests`` object
-    
+
     :param handler: str handler, like ``elink.fcgi``
     :param url_suffix: str suffix to be appended on the URL after the "?" character
-    :param retmax: int to specify the maximum number of records to return (default here 
+    :param retmax: int to specify the maximum number of records to return (default here
                    is 1000, which is more useful than the NCBI default of 20)
     '''
     @staticmethod
@@ -118,6 +121,8 @@ class QueryNCBIeUtils:
     def get_clinvar_uids_for_disease_or_phenotype_string(disphen_str):
         res = QueryNCBIeUtils.send_query_get('esearch.fcgi',
                                              'term=' + disphen_str + '[disease/phenotype]')
+        print("I'm in get_clinvar_uids")
+        print(disphen_str)
         res_set = set()
         if res is not None:
             res_json = res.json()
@@ -127,7 +132,7 @@ class QueryNCBIeUtils:
                 if idlist is not None:
                     res_set |= set([int(uid_str) for uid_str in idlist])
         return res_set
-    
+
     '''returns a set of mesh UIDs for a given disease name
 
     '''
@@ -145,8 +150,8 @@ class QueryNCBIeUtils:
                 if idlist is not None:
                     res_set |= set([int(uid_str) for uid_str in idlist])
         return res_set
-    
-    
+
+
     '''returns a list of mesh UIDs for a given mesh tree number
 
     '''
@@ -164,9 +169,9 @@ class QueryNCBIeUtils:
                 if res_idlist is not None:
                     res_list += res_idlist
         return res_list
-    
-    '''returns a list of mesh UIDs for a given mesh term query
 
+    '''
+        returns a list of mesh UIDs for a given mesh term query
     '''
     @staticmethod
     @CachedMethods.register
@@ -182,11 +187,11 @@ class QueryNCBIeUtils:
                 if res_idlist is not None:
                     res_list += res_idlist
         return res_list
-        
-    '''returns the mesh UID for a given medgen UID
 
-    :param medgen_uid: integer
-    :returns: set(integers) or ``None``
+    '''
+        returns the mesh UID for a given medgen UID
+        :param medgen_uid: integer
+        :returns: set(integers) or ``None``
     '''
     @staticmethod
     @CachedMethods.register
@@ -210,7 +215,7 @@ class QueryNCBIeUtils:
 
     '''returns the mesh terms for a given MeSH Entrez UID
 
-    :param mesh_uid: int (take the "D012345" form of the MeSH UID, remove the "D", convert to an integer, and add 
+    :param mesh_uid: int (take the "D012345" form of the MeSH UID, remove the "D", convert to an integer, and add
                      68,000,000 to the integer; then pass that integer as "mesh_uid" to this function)
     :returns: list(str) of MeSH terms
     '''
@@ -218,6 +223,7 @@ class QueryNCBIeUtils:
     #@CachedMethods.register
     def get_mesh_terms_for_mesh_uid(mesh_uid):
         assert type(mesh_uid)==int
+        # TODO: CAN DO THIS LOCALLY (Store UIDs from Descriptor name)
         res = QueryNCBIeUtils.send_query_get('esummary.fcgi',
                                              'db=mesh&id=' + str(mesh_uid))
         ret_mesh = []
@@ -237,7 +243,7 @@ class QueryNCBIeUtils:
                                 assert type(res_dsm)==list
                                 ret_mesh += res_dsm
         return ret_mesh
-    
+
     '''returns the NCBI MedGen UID for an OMIM ID
 
     :param omim_id: integer
@@ -274,13 +280,15 @@ class QueryNCBIeUtils:
                 mesh_terms = QueryNCBIeUtils.get_mesh_terms_for_mesh_uid(mesh_uid)
                 ret_mesh_terms += list(mesh_terms)
         return ret_mesh_terms
-        
+
     @staticmethod
     @CachedMethods.register
     def get_pubmed_hits_count(term_str, joint=False):
         term_str_encoded = urllib.parse.quote(term_str, safe='')
         res = QueryNCBIeUtils.send_query_get('esearch.fcgi',
                                              'db=pubmed&term=' + term_str_encoded)
+        #print("this is my string in pub med")
+        #print(term_str)
         res_int = None
         if res is not None:
             status_code = res.status_code
@@ -357,109 +365,45 @@ class QueryNCBIeUtils:
         denominator = math.log(N) - min(math.log(ni), math.log(nj))
         ngd = numerator/denominator
         return ngd
-
     @staticmethod
-    def multi_pubmed_hits_count(term_str, n_terms = 1):
-        '''
-        This is almost the same as the above get_pubmed_hit_counts but is made to work with multi_normalized_google_distance
-        '''
-        term_str_encoded = urllib.parse.quote(term_str, safe='')
-        res = QueryNCBIeUtils.send_query_get('esearch.fcgi',
-                                             'db=pubmed&term=' + term_str_encoded)
-        if res is None:
-            params = {
-                'db':'pubmed',
-                'term' : term_str
-            }
-            res = QueryNCBIeUtils.send_query_post('esearch.fcgi',
-                                                 params)
-        res_int = None
-        if res is not None:
-            status_code = res.status_code
-            if status_code == 200:
-                res_int = [int(res.json()['esearchresult']['count'])]
-                if n_terms >= 2:
-                    if 'errorlist' in res.json()['esearchresult'].keys():
-                        if 'phrasesnotfound' in res.json()['esearchresult']['errorlist'].keys():
-                                res_int += res.json()['esearchresult']['errorlist']['phrasesnotfound']
-                    else:
-                        for a in range(len(res.json()['esearchresult']['translationstack'])):
-                            if type(res.json()['esearchresult']['translationstack'][a]) == dict:
-                                res_int += [int(res.json()['esearchresult']['translationstack'][a]['count'])]
-                            elif res.json()['esearchresult']['translationstack'][a] == 'OR':
-                                res_int = [res_int[0]]
-                                res_int += ['null_flag']
-                                return res_int
-
-            else:
-                print('HTTP response status code: ' + str(status_code) + ' for query term string {term}'.format(term=term_str))
-        return res_int
-
-    @staticmethod
-    def multi_normalized_google_distance(name_list, mesh_flags = None):
+    def multi_normalized_google_distance(name_list,  pmid_mesh_dict=None):
         """
         returns the normalized Google distance for a list of n MeSH Terms
         :param name_list: a list of strings containing search terms for each node
         :param mesh_flags: a list of boolean values indicating which terms need [MeSH Terms] appended to it.
         :returns: NGD, as a float (or math.nan if any counts are zero, or None if HTTP error)
         """
-
-        if mesh_flags is None:
-            mesh_flags = [True]*len(name_list)
-        elif len(name_list) != len(mesh_flags):
-            print('Warning: mismatching lengths for input lists of names and flags returning None...')
-            return None
-
-        search_string='('
-
-        if sum(mesh_flags) == len(mesh_flags):
-            search_string += '[MeSH Terms]) AND ('.join(name_list) + '[MeSH Terms])'
-            counts = QueryNCBIeUtils.multi_pubmed_hits_count(search_string, n_terms=len(name_list))
-        else:
-            for a in range(len(name_list)):
-                search_string += name_list[a]
-                if mesh_flags[a]:
-                    search_string += "[MeSH Terms]"
-                if a < len(name_list)-1:
-                    search_string += ') AND ('
-            search_string += ')'
-            counts = QueryNCBIeUtils.multi_pubmed_hits_count(search_string, n_terms =1)
-            for a in range(len(name_list)):
-                name = name_list[a]
-                if mesh_flags[a]:
-                    name += "[MeSH Terms]"
-                counts += QueryNCBIeUtils.multi_pubmed_hits_count(name, n_terms = 1)
-
-        if type(counts[1]) == str:
-            if counts[1] == 'null_flag':
-                missed_names = [name + '[MeSH Terms]' for name in name_list]
+        """
+            from PubMed home page there are 27 million articles;
+            avg 20 MeSH terms per article
+        """
+        N = 2.7e+7 * 20
+        count_scores  = []
+        sets_of_pmids = []
+        for mesh_term in name_list:
+            if(mesh_term not in pmid_mesh_dict):
+                count_scores.append(math.nan)
             else:
-                missed_names = counts[1:]
-            counts = [counts[0]]
-            for name in name_list:
-                name_decorated = name + '[MeSH Terms]'
-                if name_decorated in missed_names:
-                    counts += QueryNCBIeUtils.multi_pubmed_hits_count(name, n_terms=1)
-                else:
-                    counts += QueryNCBIeUtils.multi_pubmed_hits_count(name_decorated, n_terms=1)
-
-        N = 2.7e+7 * 20  # from PubMed home page there are 27 million articles; avg 20 MeSH terms per article
-        if None in counts:
+                pmids, hit_cnt = pmid_mesh_dict[mesh_term]
+                count_scores.append(hit_cnt)
+                sets_of_pmids.append(set(pmids))
+        sets_intersection = len(set.intersection(*sets_of_pmids))
+        if any(x == 0 for x in count_scores) or sets_intersection == 0:
             return math.nan
-        if 0 in counts:
+        if any(x == math.nan for x in count_scores):
             return math.nan
-        numerator = max([math.log(x) for x in counts[1:]]) - math.log(counts[0])
-        denominator = math.log(N) - min([ math.log(x) for x in counts[1:]])
-        ngd = numerator/denominator
-        return ngd
+        numerator = max([math.log(x) for x in count_scores]) - math.log(sets_intersection)
+        denominator = math.log(N) - min([math.log(x) for x in count_scores])
+        return numerator / denominator
 
     @staticmethod
     @CachedMethods.register
     def get_pubmed_from_ncbi_gene(gene_id):
         '''
-        Returns a list of pubmed ids associated with a given ncbi gene id
-        :param gene_id: A string containing the ncbi gene id
+            Returns a list of pubmed ids associated with a given ncbi gene id
+            :param gene_id: A string containing the ncbi gene id
         '''
+        # CAN'T TO THIS LOCALLY
         res = QueryNCBIeUtils.send_query_get('elink.fcgi',
                                              'db=pubmed&dbfrom=gene&id=' + str(gene_id))
         ret_pubmed_ids = set()
@@ -484,6 +428,7 @@ class QueryNCBIeUtils:
     @staticmethod
     @CachedMethods.register
     def is_mesh_term(mesh_term):
+        # Can do locally; cache plz
         ret_list = QueryNCBIeUtils.get_mesh_uids_for_mesh_term(mesh_term)
         return ret_list is not None and len(ret_list) > 0
 
@@ -497,10 +442,10 @@ class QueryNCBIeUtils:
         if(hp_id[0])!='"':
             hp_id = '"' + hp_id + '"'
         hp_id+= "[Source ID]"
+        # CAN"T DO LOCALLY
         res = QueryNCBIeUtils.send_query_get('esearch.fcgi',
                                              'db=medgen&term=' + str(hp_id))
         ret_medgen_ids = set()
-
         if res is not None:
             res_json = res.json()
             res_result = res_json.get('esearchresult', None)
@@ -510,6 +455,7 @@ class QueryNCBIeUtils:
                     ret_medgen_ids |= set(res_idlist)
         mesh_ids = set()
         for medgen_id in ret_medgen_ids:
+            # CAN"T DO LOCALLY
             res = QueryNCBIeUtils.send_query_get('elink.fcgi',
                                              'dbfrom=medgen&db=mesh&id=' + str(medgen_id))
             if res is not None:
@@ -526,13 +472,14 @@ class QueryNCBIeUtils:
         mesh_terms = set()
         if len(mesh_ids) > 0:
             for mesh_id in mesh_ids:
+                # CAN"T DO LOCALLY WITHOUT MEDGEN DB
                 mesh_terms|= set(QueryNCBIeUtils.get_mesh_terms_for_mesh_uid(int(mesh_id)))
         if len(mesh_terms) > 0:
             mesh_terms = [mesh_term + '[MeSH Terms]' for mesh_term in mesh_terms]
             return mesh_terms
         else:
             return None
-    
+
     @staticmethod
     def test_ngd():
         #mesh1_str = 'Anemia, Sickle Cell'
@@ -584,9 +531,9 @@ class QueryNCBIeUtils:
         '''
         Takes a reactome id then return a string containing all synonyms listed on reactome seperated by the deliminator |
         However, If it finds a MeSH terms in the list it will return the search term as a mesh term serach
-        e.g. it will return something like '(IGF1R)[MeSH Terms]' 
+        e.g. it will return something like '(IGF1R)[MeSH Terms]'
 
-        This can be inputed into the google function as a non mesh term and will search as a mesh term. 
+        This can be inputed into the google function as a non mesh term and will search as a mesh term.
         This is so that we do not need to handle the output of this function any differently it can all be input as non mesh terms
 
         Parameters:
@@ -628,10 +575,8 @@ class QueryNCBIeUtils:
                         search += '|' + name
         search = search[1:]  # removes leading |
         return search
-
-    
-    '''Returns a set of mesh ids for a given clinvar id
-
+    '''
+        Returns a set of mesh ids for a given clinvar id
     '''
     @staticmethod
     @CachedMethods.register
@@ -684,7 +629,7 @@ class QueryNCBIeUtils:
                                                         mesh_ids = mesh_data.get('links', None)
                                                         res_set |= set([int(uid_str) for uid_str in mesh_ids])
         return res_set
-    
+
     def test_phrase_not_found():
         print('----------')
         print('Result and time for 1st error (joint search):')
@@ -709,111 +654,3 @@ class QueryNCBIeUtils:
         t0 = time.time()
         QueryNCBIeUtils.normalized_google_distance('Naprosyn','lymph nodes')
         print(time.time() - t0)
-              
-              
-if __name__ == '__main__':
-    pass
-    #print(QueryNCBIeUtils.get_clinvar_uids_for_disease_or_phenotype_string('hypercholesterolemia'))
-    #print(QueryNCBIeUtils.get_mesh_uids_for_mesh_term('Anorexia Nervosa'))
-    #print(QueryNCBIeUtils.get_mesh_uids_for_mesh_term('Leukemia, Promyelocytic, Acute'))
-    #print(QueryNCBIeUtils.get_mesh_uids_for_mesh_term('Leukemia, Myeloid, Acute'))
-    
-    # for mesh_term in ['Osteoporosis',
-    #                   'HIV Infections',
-    #                   'Cholera',
-    #                   'Ebola Infection',
-    #                   'Malaria',
-    #                   'Osteomalacia',
-    #                   'Hypercholesterolemia',
-    #                   'Diabetes Mellitus, Type 2',
-    #                   'Asthma',
-    #                   'Pancreatitis, Chronic',
-    #                   'Alzheimer Disease',
-    #                   'Myocardial Infarction',
-    #                   'Muscular Dystrophy, Duchenne',
-    #                   'NGLY1 protein, human',
-    #                   'Alcoholism',
-    #                   'Depressive Disorder, Major',
-    #                   'Niemann-Pick Disease, Type C',
-    #                   'Huntington Disease',
-    #                   'Alkaptonuria',
-    #                   'Anemia, Sickle Cell',
-    #                   'Stress Disorders, Post-Traumatic']:
-    #     print(QueryNCBIeUtils.normalized_google_distance(mesh_term, QueryNCBIeUtils.get_mesh_terms_for_omim_id(219700)[0]))
-              
-    #print(QueryNCBIeUtils.normalized_google_distance(
-    #    QueryNCBIeUtils.get_mesh_terms_for_omim_id(219700)[0],
-    #    "Cholera"))
-    
-
-
-
-
-    #reactome_list = [
-    #"R-HSA-5626467",
-    #"R-HSA-5627083",
-    #"R-HSA-447115",
-    #"R-HSA-5579012",
-    #"R-HSA-199992",
-    #"R-HSA-3000170",
-    #"R-HSA-5683371",
-    #"R-HSA-5619058",
-    #"R-HSA-5579006",
-    #"R-HSA-2404192",
-    #]
-    #
-    #for ids in reactome_list:
-    #    t0 = time.time()
-    #    searchTerm = QueryNCBIeUtils.get_reactome_names(ids)
-    #    print(searchTerm)
-    #    print(QueryNCBIeUtils.normalized_google_distance(
-    #        searchTerm,
-    #        'Human',
-    #        mesh1 = False
-    #        ))
-    #    t1 = time.time()
-    #    print(t1-t0)
-    #
-    #uniprot_list = [
-    #"Q15699",
-    #"A0A0G2JJD3",
-    #"Q9NR22",
-    #"Q92949",
-    #"Q12996",
-    #"Q92544",
-    #"Q14789",
-    #"Q9NRN5",
-    #"Q9BXW9",
-    #"P56556",
-    #"P23219"
-    #]
-    #
-    #for ids in uniprot_list:
-    #    t0 = time.time()
-    #    searchTerm = QueryNCBIeUtils.get_uniprot_names(ids)
-    #    print(searchTerm)
-    #    print(QueryNCBIeUtils.normalized_google_distance(
-    #        searchTerm,
-    #        'Human',
-    #        mesh1 = False
-    #        ))
-    #    t1 = time.time()
-    #    print(t1-t0)
-
-    #print(QueryNCBIeUtils.normalized_google_distance("acetaminophen","liver"))
-    #print(QueryNCBIeUtils.normalized_google_distance(QueryNCBIeUtils.get_uniprot_names('P23219'), 'Naprosyn', mesh1=False))
-    #print(QueryNCBIeUtils.get_mesh_terms_for_mesh_uid(68014059))
-    # print(QueryNCBIeUtils.get_mesh_terms_for_omim_id(219700)) # OMIM preferred name: "CYSTIC FIBROSIS"
-    # print(QueryNCBIeUtils.get_mesh_terms_for_omim_id(125050)) # OMIM preferred name: "DEAFNESS WITH ANHIDROTIC ECTODERMAL DYSPLASIA"
-    # print(QueryNCBIeUtils.get_mesh_terms_for_omim_id(310350)) # OMIM preferred name: "MYELOLYMPHATIC INSUFFICIENCY"
-    # print(QueryNCBIeUtils.get_mesh_terms_for_omim_id(603903)) # OMIM preferred name: "SICKLE CELL ANEMIA"
-    # print(QueryNCBIeUtils.get_mesh_terms_for_omim_id(612067)) # OMIM preferred name: "DYSTONIA 16; DYT16"
-    # print(QueryNCBIeUtils.get_mesh_terms_for_omim_id(615113)) # OMIM preferred name: "MICROPHTHALMIA, ISOLATED 8; MCOP8"
-    # print(QueryNCBIeUtils.get_mesh_terms_for_omim_id(615860)) # OMIM preferred name: "CONE-ROD DYSTROPHY 19; CORD19"
-    # print(QueryNCBIeUtils.get_mesh_terms_for_omim_id(180200)) # OMIM preferred name: "RETINOBLASTOMA; RB1"
-    # print(QueryNCBIeUtils.get_mesh_terms_for_omim_id(617062)) # OMIM preferred name: "OKUR-CHUNG NEURODEVELOPMENTAL SYNDROME; OCNDS"
-    # print(QueryNCBIeUtils.get_mesh_terms_for_omim_id(617698)) # OMIM preferred name: "3-METHYLGLUTACONIC ACIDURIA, TYPE IX; MGCA9"
-    # print(QueryNCBIeUtils.get_mesh_terms_for_mesh_uid(68003550))
-    # print(QueryNCBIeUtils.get_medgen_uid_for_omim_id(219550))
-    # print(QueryNCBIeUtils.get_mesh_uid_for_medgen_uid(41393))
-

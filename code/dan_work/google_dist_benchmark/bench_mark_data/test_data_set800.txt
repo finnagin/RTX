@@ -1,0 +1,800 @@
+          Aluminum Silicates
+          Animal Feed
+          Animals
+          Female
+          Litter Size
+          Mink
+          Reproduction
+          Zearalenone
+          Zeolites
+          Aged
+          Carcinoma, Squamous Cell
+          Combined Modality Therapy
+          Cytomegalovirus
+          Cytomegalovirus Infections
+          Gastrointestinal Hemorrhage
+          Humans
+          Ileal Diseases
+          Ileum
+          Inclusion Bodies, Viral
+          Male
+          Postoperative Complications
+          Radiography
+          Tongue Neoplasms
+          Acquired Immunodeficiency Syndrome
+          Adult
+          Anal Canal
+          Anus Diseases
+          Biopsy
+          Cytomegalovirus Infections
+          Humans
+          Inclusion Bodies, Viral
+          Male
+          Opportunistic Infections
+          Ulcer
+          Adenomatous Polyposis Coli
+          Endoscopy, Gastrointestinal
+          Gardner Syndrome
+          Gastrointestinal Neoplasms
+          Humans
+          Mass Screening
+          Predictive Value of Tests
+          Animals
+          Antihypertensive Agents
+          Blood Pressure
+          Humans
+          Hypertension
+          Adult
+          Aging
+          Animals
+          Blood Pressure
+          Cardiomegaly
+          Child
+          Environment
+          Gonadal Steroid Hormones
+          Growth
+          Growth Hormone
+          Humans
+          Hypertension
+          Insulin
+          Insulin Resistance
+          Insulin-Like Growth Factor I
+          Rats
+          Rats, Inbred SHR
+          Animals
+          Extracellular Space
+          Hemodynamics
+          Hypertension
+          Kidney
+          Male
+          Rats
+          Rats, Inbred SHR
+          Rats, Inbred WKY
+          Sodium, Dietary
+          Stress, Physiological
+          Sympathetic Nervous System
+          1-(5-Isoquinolinesulfonyl)-2-Methylpiperazine
+          Animals
+          Calcium
+          Hypertension
+          Isoquinolines
+          Muscle Contraction
+          Muscle Proteins
+          Muscle, Smooth, Vascular
+          Piperazines
+          Polymyxin B
+          Protein Kinase C
+          Rats
+          Rats, Inbred SHR
+          Rats, Inbred WKY
+          Animals
+          Blood Glucose
+          Desoxycorticosterone
+          Hypertension
+          Hypertension, Renovascular
+          Insulin Resistance
+          Male
+          Rats
+          Rats, Inbred SHR
+          Rats, Inbred WKY
+          Sodium, Dietary
+          Animals
+          Brain
+          Hypertension
+          Male
+          Microcirculation
+          Peptidyl-Dipeptidase A
+          Radioligand Assay
+          Rats
+          Rats, Inbred SHR
+          Rats, Inbred WKY
+          Angiotensin-Converting Enzyme Inhibitors
+          Animals
+          Antihypertensive Agents
+          Bradykinin
+          Chromatography, High Pressure Liquid
+          Cilazapril
+          Drug Eruptions
+          Drug Synergism
+          Erythema
+          Guinea Pigs
+          Imidazoles
+          Pyridazines
+          Renin
+          Renin-Angiotensin System
+          Adult
+          Atrial Natriuretic Factor
+          Cardiomegaly
+          Echocardiography
+          Echocardiography, Doppler
+          Female
+          Humans
+          Hypertension
+          Male
+          Systole
+          Ventricular Function, Left
+          Animals
+          Arrhythmias, Cardiac
+          Blood Pressure
+          Cardiomegaly
+          Electrocardiography
+          Hypertension
+          Magnesium
+          Perfusion
+          Potassium
+          Rats
+          Rats, Inbred SHR
+          Rats, Inbred WKY
+          Water-Electrolyte Balance
+          Aged
+          Blood Pressure
+          Cardiac Output
+          Circadian Rhythm
+          Echocardiography
+          Exercise
+          Female
+          Humans
+          Hypertension
+          Isoproterenol
+          Male
+          Ventricular Function, Left
+          Blood Glucose
+          Blood Pressure
+          Blood Pressure Monitors
+          Cholesterol
+          Female
+          Humans
+          Hypertension
+          Male
+          Middle Aged
+          Risk Factors
+          Smoking
+          Adult
+          Arousal
+          Blood Pressure
+          Blood Pressure Monitors
+          Electroencephalography
+          Electromyography
+          Electrooculography
+          Female
+          Heart Rate
+          Humans
+          Male
+          Middle Aged
+          Monitoring, Physiologic
+          Sleep
+          Adult
+          Blood Pressure
+          Dietary Fiber
+          Double-Blind Method
+          Female
+          Humans
+          Hypertension
+          Male
+          Middle Aged
+          Prospective Studies
+          Time Factors
+          Weight Loss
+          ACTH Syndrome, Ectopic
+          Adrenocorticotropic Hormone
+          Carcinoma, Small Cell
+          Humans
+          Hydrocortisone
+          Liver Function Tests
+          Liver Neoplasms
+          Lung Neoplasms
+          Male
+          Middle Aged
+          Tomography, X-Ray Computed
+          Astrocytoma
+          Biopsy, Needle
+          Brain
+          Brain Neoplasms
+          Carcinoma, Non-Small-Cell Lung
+          Child
+          Diagnosis, Differential
+          Humans
+          Lung Neoplasms
+          Male
+          Middle Aged
+          Stereotaxic Techniques
+          Tomography, X-Ray Computed
+          American Medical Association
+          Centers for Disease Control and Prevention (U.S.)
+          HIV Infections
+          Humans
+          Medicare
+          Medicine
+          United States
+          Animals
+          Chlorides
+          Colony-Forming Units Assay
+          Dose-Response Relationship, Drug
+          Erythroid Precursor Cells
+          Female
+          Hematopoietic Stem Cells
+          Humans
+          In Vitro Techniques
+          Lithium
+          Lithium Chloride
+          Male
+          Mice
+          Mice, Inbred BALB C
+          Mice, Inbred C3H
+          Zidovudine
+          Anus Neoplasms
+          Child
+          Child Abuse, Sexual
+          Child, Preschool
+          Condylomata Acuminata
+          DNA Probes, HPV
+          DNA, Viral
+          Family Practice
+          Female
+          Humans
+          Male
+          Papillomaviridae
+          Vulvar Neoplasms
+          Australia
+          Base Sequence
+          Blotting, Southern
+          Cadmium
+          Chromosome Deletion
+          Chromosome Mapping
+          Chromosomes, Bacterial
+          DNA Transposable Elements
+          DNA, Bacterial
+          Drug Resistance, Microbial
+          London
+          Methicillin Resistance
+          Molecular Sequence Data
+          Mutation
+          New Jersey
+          Staphylococcus aureus
+          Animals
+          Axons
+          Brain Mapping
+          Carbocyanines
+          Fluorescent Dyes
+          Inferior Colliculi
+          Nasal Cavity
+          Neuronal Plasticity
+          Rats
+          Rats, Inbred Strains
+          Retina
+          Retinal Ganglion Cells
+          Superior Colliculi
+          Synaptic Transmission
+          Animals
+          Convergence, Ocular
+          Female
+          Horseradish Peroxidase
+          Male
+          Neurons
+          Synaptic Transmission
+          Tupaiidae
+          Vision, Binocular
+          Visual Cortex
+          Animals
+          Base Sequence
+          Brain
+          DNA
+          Genome
+          Molecular Sequence Data
+          Muscles
+          Polymerase Chain Reaction
+          RNA Splicing
+          Rats
+          Ribonucleases
+          Sodium Channels
+          Transcription, Genetic
+          Animals
+          Dose-Response Relationship, Drug
+          Immune Sera
+          Injections
+          Models, Neurological
+          Nerve Crush
+          Nerve Growth Factors
+          Nerve Regeneration
+          Nervous System Physiological Phenomena
+          Rats
+          Sensation
+          Skin Physiological Phenomena
+          Spinal Cord
+          Synaptic Transmission
+          Animals
+          Electrophysiology
+          Extremities
+          Grasshoppers
+          Hair
+          Interneurons
+          Neural Pathways
+          Neurons, Afferent
+          Synapses
+          Synaptic Transmission
+          Animals
+          Catheterization
+          Guinea Pigs
+          In Vitro Techniques
+          Intestinal Mucosa
+          Intestine, Small
+          Myenteric Plexus
+          Neural Pathways
+          Neurons
+          Physical Stimulation
+          Reflex
+          Synaptic Transmission
+          Activated-Leukocyte Cell Adhesion Molecule
+          Afferent Pathways
+          Animals
+          Axons
+          Cerebellar Nuclei
+          Cerebellum
+          Chick Embryo
+          Chimera
+          Coturnix
+          Embryo, Nonmammalian
+          Embryonic and Fetal Development
+          Extracellular Matrix Proteins
+          Nerve Fibers
+          Nerve Tissue Proteins
+          Olivary Nucleus
+          Synaptic Transmission
+          Animals
+          Calcium
+          Calcium Channel Blockers
+          Cells, Cultured
+          Hippocampus
+          Homeostasis
+          Hypoglycemia
+          Insulin
+          Neurons
+          Phosphotransferases
+          Receptors, Amino Acid
+          Receptors, Cell Surface
+          Septum Pellucidum
+          Somatomedins
+          Animals
+          Cells, Cultured
+          Chromosome Deletion
+          Chromosome Mapping
+          Drosophila
+          Homozygote
+          Ion Channel Gating
+          Larva
+          Mutation
+          Neurons
+          Phenotype
+          Sequence Homology, Nucleic Acid
+          Sodium Channels
+          beta-Galactosidase
+          Animals
+          Bird Diseases
+          Birds
+          Cestoda
+          Cestode Infections
+          Cote d'Ivoire
+          Adult
+          Aged
+          Aged, 80 and over
+          Aging
+          Female
+          Humans
+          Male
+          Middle Aged
+          Parotid Gland
+          Radionuclide Imaging
+          Saliva
+          Salivary Glands
+          Secretory Rate
+          Sjogren's Syndrome
+          Sodium Pertechnetate Tc 99m
+          Sublingual Gland
+          Submandibular Gland
+          Thyroid Gland
+          Xerostomia
+          Adult
+          Cell Nucleus
+          Cytodiagnosis
+          Cytomegalovirus
+          Cytoplasm
+          DNA Probes
+          DNA, Viral
+          Female
+          HIV Infections
+          HIV Seropositivity
+          Herpesvirus 4, Human
+          Humans
+          Immunohistochemistry
+          Keratinocytes
+          Leukoplakia, Oral
+          Male
+          Nucleic Acid Hybridization
+          Tongue
+          Tongue Neoplasms
+          Tumor Virus Infections
+          Viral Proteins
+          Cell Nucleolus
+          Cell Nucleus
+          Cytoplasm
+          Fibroblasts
+          Humans
+          Infant
+          Male
+          Maxillary Neoplasms
+          Melanins
+          Mesoderm
+          Neoplasms, Germ Cell and Embryonal
+          Phosphopyruvate Hydratase
+          Synaptophysin
+          Vimentin
+          Blood Platelets
+          Carrier Proteins
+          Depression
+          Fibromyalgia
+          Humans
+          Imipramine
+          Monoamine Oxidase
+          Receptors, Drug
+          Receptors, Neurotransmitter
+          Reference Values
+          Serotonin
+          Surveys and Questionnaires
+          Syndrome
+          Tritium
+          Diphosphates
+          Humans
+          Joint Diseases
+          Osteoarthritis
+          Radiography
+          Tibia
+          Biopsy, Needle
+          Carcinoma
+          Carcinoma, Hepatocellular
+          Humans
+          Liver Neoplasms
+          Melanoma
+          Middle Aged
+          Pancreatic Neoplasms
+          Predictive Value of Tests
+          Sensitivity and Specificity
+          Ultrasonography
+          Animals
+          Electric Conductivity
+          Gene Expression Regulation
+          Organ Specificity
+          Sodium Channels
+          Adenomatous Polyposis Coli
+          Colonic Neoplasms
+          England
+          Humans
+          Incidence
+          Models, Genetic
+          Mutation
+          Adenosine Triphosphatases
+          Amino Acid Sequence
+          Animals
+          Arvicolinae
+          Base Sequence
+          Biological Evolution
+          DNA
+          DNA, Mitochondrial
+          Electron Transport Complex IV
+          Genetic Variation
+          Kinetics
+          Molecular Sequence Data
+          Nucleic Acid Conformation
+          RNA, Transfer, Lys
+          Rats
+          Sequence Alignment
+          Breast Neoplasms
+          Colonic Neoplasms
+          Dietary Fats
+          Dietary Fiber
+          Female
+          Humans
+          Male
+          Body Temperature
+          Cold Temperature
+          Humans
+          Intermittent Claudication
+          Leg
+          Middle Aged
+          Peripheral Nervous System Diseases
+          Asbestos
+          Asbestos, Crocidolite
+          Cathepsin B
+          Cell Differentiation
+          Depression, Chemical
+          Humans
+          Tumor Cells, Cultured
+          Adult
+          Alcoholism
+          Follow-Up Studies
+          Humans
+          Length of Stay
+          Male
+          Outcome and Process Assessment (Health Care)
+          Substance Abuse Treatment Centers
+          Therapeutic Community
+          Veterans
+          Aged
+          Arm
+          Buttocks
+          Combined Modality Therapy
+          Follow-Up Studies
+          Histiocytoma, Benign Fibrous
+          Humans
+          Male
+          Muscles
+          Neoplasms, Second Primary
+          Soft Tissue Neoplasms
+          Animals
+          Benzamides
+          Binding, Competitive
+          Bronchoconstriction
+          Cricetinae
+          Duodenum
+          Intestinal Mucosa
+          Neurokinin A
+          Piperidines
+          Rabbits
+          Rats
+          Receptors, Neurokinin-2
+          Receptors, Neurotransmitter
+          Vasoconstriction
+          Animals
+          Dose-Response Relationship, Drug
+          Endothelins
+          In Vitro Techniques
+          Peptides, Cyclic
+          Potassium Chloride
+          Receptors, Cell Surface
+          Receptors, Endothelin
+          Swine
+          Vasoconstriction
+          Vasodilation
+          Acetylcholine
+          Cholinergic Fibers
+          Synapses
+          Synaptic Transmission
+          Aldosterone
+          Animals
+          Atrial Natriuretic Factor
+          Binding, Competitive
+          Diet
+          Male
+          Rats
+          Rats, Inbred Strains
+          Receptors, Atrial Natriuretic Factor
+          Receptors, Cell Surface
+          Sodium Chloride
+          Zona Glomerulosa
+          Animals
+          Dronabinol
+          Growth Hormone
+          Male
+          Rats
+          Rats, Inbred Strains
+          Secretory Rate
+          Time Factors
+          Animals
+          Arachidonic Acid
+          Calcium
+          Cells, Cultured
+          Chloride Channels
+          Chlorides
+          Cyclic AMP
+          Dogs
+          Epithelium
+          In Vitro Techniques
+          Indomethacin
+          Isoproterenol
+          Masoprocol
+          Membrane Proteins
+          Secretory Rate
+          Trachea
+          Academic Medical Centers
+          Humans
+          Integrated Advanced Information Management Systems
+          New York City
+          Organizational Objectives
+          Program Development
+          Software Design
+          Contrast Media
+          Diffusion
+          Drug Carriers
+          Electron Spin Resonance Spectroscopy
+          Gadolinium
+          Gadolinium DTPA
+          Liposomes
+          Magnetic Resonance Imaging
+          Models, Chemical
+          Models, Structural
+          Organometallic Compounds
+          Pentetic Acid
+          Permeability
+          Surface Properties
+          Water
+          Adenosine Triphosphate
+          Brain
+          Computer Simulation
+          Humans
+          Image Enhancement
+          Leg
+          Magnetic Resonance Spectroscopy
+          Models, Theoretical
+          Muscles
+          Phosphoric Diester Hydrolases
+          Phosphorus
+          Acetazolamide
+          Animals
+          Brain
+          Capillaries
+          Cats
+          Cerebrovascular Circulation
+          Contrast Media
+          Dextrans
+          Electron Spin Resonance Spectroscopy
+          Ferrosoferric Oxide
+          Gadolinium
+          Gadolinium DTPA
+          Image Enhancement
+          Iron
+          Iron-Dextran Complex
+          Magnetic Resonance Imaging
+          Magnetite Nanoparticles
+          Male
+          Meglumine
+          Organometallic Compounds
+          Oxides
+          Pentetic Acid
+          Rats
+          Rats, Inbred Strains
+          Rheology
+          Electron Spin Resonance Spectroscopy
+          Equipment Design
+          Magnetic Resonance Spectroscopy
+          Sodium
+          Surface Properties
+          Animals
+          Astrocytoma
+          Blood-Brain Barrier
+          Body Water
+          Brain Chemistry
+          Brain Edema
+          Brain Neoplasms
+          Hydrogen
+          Magnetic Resonance Spectroscopy
+          Male
+          Potassium
+          Protons
+          Rats
+          Rats, Inbred F344
+          Sodium
+          Acetylcholinesterase
+          Analysis of Variance
+          Animals
+          Ca(2+) Mg(2+)-ATPase
+          Calcium-Transporting ATPases
+          Cholesterol
+          Dietary Fats
+          Erythrocyte Membrane
+          Fatty Acids
+          Fatty Acids, Unsaturated
+          Male
+          Membrane Lipids
+          Phospholipids
+          Rats
+          Rats, Inbred Strains
+          Sodium-Potassium-Exchanging ATPase
+          Adult
+          Ca(2+) Mg(2+)-ATPase
+          Diabetes Mellitus, Type 2
+          Erythrocytes
+          Female
+          Humans
+          Hyperkalemia
+          Male
+          Middle Aged
+          Potassium
+          Reference Values
+          Sodium
+          Sodium-Potassium-Exchanging ATPase
+          Antibodies, Bacterial
+          Antigens, Bacterial
+          Bacterial Proteins
+          Cytomegalovirus
+          Cytomegalovirus Infections
+          Fluorescent Antibody Technique
+          Hepatitis, Viral, Human
+          Humans
+          Immunoblotting
+          Immunoenzyme Techniques
+          Immunoglobulin G
+          Immunoglobulin M
+          Liver Transplantation
+          Peptides
+          Recombinant Proteins
+          Animals
+          Antibodies, Viral
+          Aphthovirus
+          Cattle
+          Cattle Diseases
+          Foot-and-Mouth Disease
+          Immunization, Secondary
+          Neutralization Tests
+          Rabies
+          Rabies Vaccines
+          Vaccination
+          Viral Vaccines
+          Adolescent
+          Adult
+          Age Factors
+          Antibodies, Viral
+          Child
+          Child, Preschool
+          Cross Reactions
+          Cytomegalovirus Infections
+          Fetal Blood
+          Fluorescent Antibody Technique
+          HIV Infections
+          Herpesviridae Infections
+          Herpesvirus 6, Human
+          Humans
+          Immunoglobulin G
+          Incidence
+          Infant
+          Italy
+          Prevalence
+          Accidents, Traffic
+          Airway Obstruction
+          Animals
+          Cannabinoids
+          Carcinogens
+          Dronabinol
+          Female
+          Head and Neck Neoplasms
+          Humans
+          Infant, Newborn
+          Leukemia
+          Marijuana Smoking
+          Memory
+          Mutagenicity Tests
+          Mutagens
+          Pregnancy
+          Prenatal Exposure Delayed Effects
+          Antineoplastic Agents
+          Cannabinoids
+          Cannabis
+          Dronabinol
+          Humans
+          Marijuana Smoking
+          Vomiting
+          Animals
+          Brain Damage, Chronic
+          Brain Ischemia
+          Calcium Channel Blockers
+          Humans
+          Neural Inhibition
+          Receptors, AMPA

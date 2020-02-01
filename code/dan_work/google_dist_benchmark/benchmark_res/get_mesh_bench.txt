@@ -1,0 +1,4 @@
+N (edges)	time (seconds)
+11  		96.50191187858582
+21			167.86466312408447
+41			failed due to network retries error
