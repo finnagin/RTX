@@ -16,9 +16,6 @@ import itertools
 import functools
 import CustomExceptions
 
-#sys.path.append('../../dan_work/improved_ngd_comp')
-#from XMLExtractor import XMLExtractor
-
 try:
     from QueryCOHD import QueryCOHD
 except ImportError:
