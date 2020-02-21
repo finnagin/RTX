@@ -186,5 +186,8 @@ class predictor():
         print(self.prob_single('ChEMBL:154',':D'))
         print(self.prob_single(':D',':D'))
 
+if __name__ == "__main__":
+    pred = predictor()
+    pred.single_test()
 
 
