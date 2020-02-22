@@ -1,6 +1,9 @@
 #!/bin/env python3
 import sys
+
+
 def eprint(*args, **kwargs): print(*args, file=sys.stderr, **kwargs)
+
 
 import os
 import json
@@ -10,6 +13,7 @@ import numpy as np
 from response import Response
 from collections import Counter
 import traceback
+
 
 class ARAXOverlay:
 
@@ -35,13 +39,18 @@ class ARAXOverlay:
             # report number of nodes and edges, and their type in the QG
             if hasattr(message, 'query_graph') and message.query_graph:
                 response.debug(f"Query graph is {message.query_graph}")
-            if hasattr(message, 'knowledge_graph') and message.knowledge_graph and hasattr(message.knowledge_graph, 'nodes') and message.knowledge_graph.nodes and hasattr(message.knowledge_graph, 'edges') and message.knowledge_graph.edges:
+            if hasattr(message, 'knowledge_graph') and message.knowledge_graph and hasattr(message.knowledge_graph,
+                                                                                           'nodes') and message.knowledge_graph.nodes and hasattr(
+                    message.knowledge_graph, 'edges') and message.knowledge_graph.edges:
                 response.debug(f"Number of nodes in KG is {len(message.knowledge_graph.nodes)}")
-                response.debug(f"Number of nodes in KG by type is {Counter([x.type[0] for x in message.knowledge_graph.nodes])}")  # type is a list, just get the first one
-                #response.debug(f"Number of nodes in KG by with attributes are {Counter([x.type for x in message.knowledge_graph.nodes])}")  # don't really need to worry about this now
+                response.debug(
+                    f"Number of nodes in KG by type is {Counter([x.type[0] for x in message.knowledge_graph.nodes])}")  # type is a list, just get the first one
+                # response.debug(f"Number of nodes in KG by with attributes are {Counter([x.type for x in message.knowledge_graph.nodes])}")  # don't really need to worry about this now
                 response.debug(f"Number of edges in KG is {len(message.knowledge_graph.edges)}")
-                response.debug(f"Number of edges in KG by type is {Counter([x.type for x in message.knowledge_graph.edges])}")
-                response.debug(f"Number of edges in KG with attributes is {len([x for x in message.knowledge_graph.edges if x.edge_attributes])}")
+                response.debug(
+                    f"Number of edges in KG by type is {Counter([x.type for x in message.knowledge_graph.edges])}")
+                response.debug(
+                    f"Number of edges in KG with attributes is {len([x for x in message.knowledge_graph.edges if x.edge_attributes])}")
                 # Collect attribute names, could do this with list comprehension, but this is so much more readable
                 attribute_names = []
                 for x in message.knowledge_graph.edges:
@@ -61,7 +70,6 @@ class ARAXOverlay:
             description_list.append(getattr(self, '_' + self.__class__.__name__ + '__' + action)(describe=True))
         return description_list
 
-
     # Write a little helper function to test parameters
     def check_params(self, allowable_parameters):
         """
@@ -76,13 +84,14 @@ class ARAXOverlay:
                     f"Supplied parameter {key} is not permitted. Allowable parameters are: {list(allowable_parameters.keys())}",
                     error_code="UnknownParameter")
             elif item not in allowable_parameters[key]:
-                if any([type(x) == float for x in allowable_parameters[key]]) or any([type(x) == int for x in allowable_parameters[key]]):  # if it's a float or int, just accept it as it is
+                if any([type(x) == float for x in allowable_parameters[key]]) or any([type(x) == int for x in
+                                                                                      allowable_parameters[
+                                                                                          key]]):  # if it's a float or int, just accept it as it is
                     return
                 else:  # otherwise, it's really not an allowable parameter
                     self.response.error(
                         f"Supplied value {item} is not permitted. In action {allowable_parameters['action']}, allowable values to {key} are: {list(allowable_parameters[key])}",
                         error_code="UnknownValue")
-
 
     #### Top level decision maker for applying filters
     def apply(self, input_message, input_parameters):
@@ -102,9 +111,12 @@ class ARAXOverlay:
 
         # check to see if an action is actually provided
         if 'action' not in input_parameters:
-            response.error(f"Must supply an action. Allowable actions are: action={allowable_actions}", error_code="MissingAction")
+            response.error(f"Must supply an action. Allowable actions are: action={allowable_actions}",
+                           error_code="MissingAction")
         elif input_parameters['action'] not in allowable_actions:
-            response.error(f"Supplied action {input_parameters['action']} is not permitted. Allowable actions are: {allowable_actions}", error_code="UnknownAction")
+            response.error(
+                f"Supplied action {input_parameters['action']} is not permitted. Allowable actions are: {allowable_actions}",
+                error_code="UnknownAction")
 
         #### Return if any of the parameters generated an error (showing not just the first one)
         if response.status != 'OK':
@@ -120,9 +132,11 @@ class ARAXOverlay:
         self.parameters = parameters
 
         # convert the action string to a function call (so I don't need a ton of if statements
-        getattr(self, '_' + self.__class__.__name__ + '__' + parameters['action'])()  # thank you https://stackoverflow.com/questions/11649848/call-methods-by-string
+        getattr(self, '_' + self.__class__.__name__ + '__' + parameters[
+            'action'])()  # thank you https://stackoverflow.com/questions/11649848/call-methods-by-string
 
-        response.debug(f"Applying Overlay to Message with parameters {parameters}")  # TODO: re-write this to be more specific about the actual action
+        response.debug(
+            f"Applying Overlay to Message with parameters {parameters}")  # TODO: re-write this to be more specific about the actual action
 
         # TODO: add_pubmed_ids
         # TODO: compute_confidence_scores
@@ -171,6 +185,12 @@ class ARAXOverlay:
         response = NGD.compute_ngd()
         return response
 
+    def compute_probabilities(self):
+        from Overlay.predictor_.predictor import predictor
+        pred = predictor(model_file='Overlay/predictor_/LogModel.pkl')
+        pred.import_file(None, graph_file='Overlay/predictor_/rel_max.emb.gz', map_file='Overlay/predictor_/map.csv')
+        pred.single_test()
+
     #### Compute confidence scores. Double underscore means this is a private method
     def __compute_confidence_scores(self, describe=False):
 
@@ -178,7 +198,6 @@ class ARAXOverlay:
         allowable_parameters = {'action': {'compute_confidence_scores'}}
         if describe:
             return allowable_parameters
-
 
         #### Set up local references to the response and the message
         response = self.response
@@ -191,7 +210,7 @@ class ARAXOverlay:
 
         #### Loop over all results, computing and storing confidence scores
         for result in message.results:
-            result.confidence = float(int(random.random()*1000))/1000
+            result.confidence = float(int(random.random() * 1000)) / 1000
 
         #### Return the response
         return response
@@ -207,13 +226,16 @@ class ARAXOverlay:
 
         # make a list of the allowable parameters (keys), and their possible values (values). Note that the action and corresponding name will always be in the allowable parameters
         if message and parameters and hasattr(message, 'query_graph') and hasattr(message.query_graph, 'edges'):
-            allowable_parameters = {'action': {'overlay_clinical_info'}, 'paired_concept_freq': {'true', 'false'}, 'observed_expected_ratio': {'true','false'},
-                                    'virtual_edge_type': {self.parameters['virtual_edge_type'] if 'virtual_edge_type' in self.parameters else None},
+            allowable_parameters = {'action': {'overlay_clinical_info'}, 'paired_concept_freq': {'true', 'false'},
+                                    'observed_expected_ratio': {'true', 'false'},
+                                    'virtual_edge_type': {self.parameters[
+                                                              'virtual_edge_type'] if 'virtual_edge_type' in self.parameters else None},
                                     'source_qnode_id': set([x.id for x in self.message.query_graph.nodes]),
                                     'target_qnode_id': set([x.id for x in self.message.query_graph.nodes])
                                     }
         else:
-            allowable_parameters = {'action': {'overlay_clinical_info'}, 'paired_concept_freq': {'true', 'false'}, 'observed_expected_ratio': {'true','false'},
+            allowable_parameters = {'action': {'overlay_clinical_info'}, 'paired_concept_freq': {'true', 'false'},
+                                    'observed_expected_ratio': {'true', 'false'},
                                     'virtual_edge_type': {'any string label (optional)'},
                                     'source_qnode_id': {'a specific source query node id (optional)'},
                                     'target_qnode_id': {'a specific target query node id (optional)'}
@@ -223,28 +245,31 @@ class ARAXOverlay:
         if describe:
             return allowable_parameters
 
-
         # Make sure only allowable parameters and values have been passed
         self.check_params(allowable_parameters)
         # return if bad parameters have been passed
         if self.response.status != 'OK':
             return self.response
 
-        #check if conflicting parameters have been provided
+        # check if conflicting parameters have been provided
         mutually_exclusive_params = {'paired_concept_freq', 'observed_expected_ratio'}
         if np.sum([x in mutually_exclusive_params for x in parameters]) > 1:
-            self.response.error(f"The parameters {mutually_exclusive_params} are mutually exclusive. Please provide only one for each call to overlay(action=overlay_clinical_info)")
+            self.response.error(
+                f"The parameters {mutually_exclusive_params} are mutually exclusive. Please provide only one for each call to overlay(action=overlay_clinical_info)")
         if self.response.status != 'OK':
             return self.response
 
         # check if all required parameters are provided
         if any([x in ['virtual_edge_type', 'source_qnode_id', 'target_qnode_id'] for x in parameters.keys()]):
             if not all([x in parameters.keys() for x in ['virtual_edge_type', 'source_qnode_id', 'target_qnode_id']]):
-                self.response.error(f"If any of of the following parameters are provided ['virtual_edge_type', 'source_qnode_id', 'target_qnode_id'], all must be provided. Allowable parameters include: {allowable_parameters}")
+                self.response.error(
+                    f"If any of of the following parameters are provided ['virtual_edge_type', 'source_qnode_id', 'target_qnode_id'], all must be provided. Allowable parameters include: {allowable_parameters}")
             elif parameters['source_qnode_id'] not in allowable_parameters['source_qnode_id']:
-                self.response.error(f"source_qnode_id value is not valid. Valid values are: {allowable_parameters['source_qnode_id']}")
+                self.response.error(
+                    f"source_qnode_id value is not valid. Valid values are: {allowable_parameters['source_qnode_id']}")
             elif parameters['target_qnode_id'] not in allowable_parameters['target_qnode_id']:
-                self.response.error(f"target_qnode_id value is not valid. Valid values are: {allowable_parameters['target_qnode_id']}")
+                self.response.error(
+                    f"target_qnode_id value is not valid. Valid values are: {allowable_parameters['target_qnode_id']}")
         if self.response.status != 'OK':
             return self.response
 
@@ -272,7 +297,6 @@ class ARAXOverlay:
         # A little function to describe what this thing does
         if describe:
             return allowable_parameters
-
 
         # Make sure only allowable parameters and values have been passed
         self.check_params(allowable_parameters)
@@ -320,11 +344,12 @@ class ARAXOverlay:
         # TODO: the start_node_id CANNOT be a set
         if message and parameters and hasattr(message, 'query_graph') and hasattr(message.query_graph, 'nodes'):
             allowable_parameters = {'action': {'compute_jaccard'},
-                                'start_node_id': set([x.id for x in self.message.query_graph.nodes]),
-                                'intermediate_node_id': set([x.id for x in self.message.query_graph.nodes]),
-                                'end_node_id': set([x.id for x in self.message.query_graph.nodes]),
-                                'virtual_edge_type': {self.parameters['virtual_edge_type'] if 'virtual_edge_type' in self.parameters else "any_string"}
-                                }
+                                    'start_node_id': set([x.id for x in self.message.query_graph.nodes]),
+                                    'intermediate_node_id': set([x.id for x in self.message.query_graph.nodes]),
+                                    'end_node_id': set([x.id for x in self.message.query_graph.nodes]),
+                                    'virtual_edge_type': {self.parameters[
+                                                              'virtual_edge_type'] if 'virtual_edge_type' in self.parameters else "any_string"}
+                                    }
         else:
             allowable_parameters = {'action': {'compute_jaccard'},
                                     'start_node_id': {"a node id"},
@@ -353,6 +378,7 @@ class ARAXOverlay:
         response = JAC.compute_jaccard()
         return response
 
+
 ##########################################################################################
 def main():
     print("start ARAX_overlay")
@@ -364,21 +390,23 @@ def main():
     #### Create an ActionsParser object
     from actions_parser import ActionsParser
     actions_parser = ActionsParser()
- 
+
     #### Set a simple list of actions
-    #actions_list = [
+    # actions_list = [
     #    "overlay(compute_confidence_scores=true)",
     #    "return(message=true,store=false)"
-    #]
-
+    # ]
+    o_temp = ARAXOverlay()
+    o_temp.compute_probabilities()
     actions_list = [
-        #"overlay(action=compute_ngd)",
-        #"overlay(action=overlay_clinical_info, paired_concept_freq=true)",
+        # "overlay(action=compute_ngd)",
+        # "overlay(action=overlay_clinical_info, paired_concept_freq=true)",
         # "overlay(action=overlay_clinical_info, paired_concept_freq=true, virtual_edge_type=P1, source_qnode_id=n00, target_qnode_id=n01)",
-        #"overlay(action=compute_jaccard, start_node_id=n00, intermediate_node_id=n01, end_node_id=n02, virtual_edge_type=J1)",
-        #"overlay(action=add_node_pmids)",
-        "overlay(action=overlay_clinical_info, observed_expected_ratio=true)",
-        #"overlay(action=overlay_clinical_info, paired_concept_freq=true, virtual_edge_type=P1, source_qnode_id=n00, target_qnode_id=n01)",
+        # "overlay(action=compute_jaccard, start_node_id=n00, intermediate_node_id=n01, end_node_id=n02, virtual_edge_type=J1)",
+        # "overlay(action=add_node_pmids)",
+        #"overlay(action=overlay_clinical_info, observed_expected_ratio=true)",
+        "overlay(action=compute_probabilities)"
+        # "overlay(action=overlay_clinical_info, paired_concept_freq=true, virtual_edge_type=P1, source_qnode_id=n00, target_qnode_id=n01)",
         "return(message=true,store=false)"
     ]
 
@@ -391,23 +419,24 @@ def main():
     actions = result.data['actions']
 
     #### Read message #2 from the database. This should be the acetaminophen proteins query result message
-    sys.path.append(os.path.dirname(os.path.abspath(__file__))+"/../../UI/Feedback")
+    sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/../../UI/Feedback")
     from RTXFeedback import RTXFeedback
     araxdb = RTXFeedback()
 
-    #message_dict = araxdb.getMessage(2)  # acetaminophen2proteins graph
+    # message_dict = araxdb.getMessage(2)  # acetaminophen2proteins graph
     # message_dict = araxdb.getMessage(13)  # ibuprofen -> proteins -> disease # work computer
-    #message_dict = araxdb.getMessage(14)  # pleuropneumonia -> phenotypic_feature # work computer
-    #message_dict = araxdb.getMessage(16)  # atherosclerosis -> phenotypic_feature  # work computer
-    #message_dict = araxdb.getMessage(5)  # atherosclerosis -> phenotypic_feature  # home computer
-    #message_dict = araxdb.getMessage(10)
-    message_dict = araxdb.getMessage(36)  # test COHD obs/exp, via ARAX_query.py 16
+    # message_dict = araxdb.getMessage(14)  # pleuropneumonia -> phenotypic_feature # work computer
+    # message_dict = araxdb.getMessage(16)  # atherosclerosis -> phenotypic_feature  # work computer
+    # message_dict = araxdb.getMessage(5)  # atherosclerosis -> phenotypic_feature  # home computer
+    # message_dict = araxdb.getMessage(10)
+    message_dict = araxdb.getMessage(4)  # test COHD obs/exp, via ARAX_query.py 16
+
 
     #### The stored message comes back as a dict. Transform it to objects
     from ARAX_messenger import ARAXMessenger
     message = ARAXMessenger().from_dict(message_dict)
-    #print(json.dumps(ast.literal_eval(repr(message)),sort_keys=True,indent=2))
-
+    # print(json.dumps(ast.literal_eval(repr(message)),sort_keys=True,indent=2))
+    #print(message)
     #### Create an overlay object and use it to apply action[0] from the list
     print("Applying action")
     overlay = ARAXOverlay()
@@ -415,42 +444,43 @@ def main():
     response.merge(result)
     print("Finished applying action")
 
-    #if result.status != 'OK':
+    # if result.status != 'OK':
     #    print(response.show(level=Response.DEBUG))
     #    return response
-    #response.data = result.data
+    # response.data = result.data
 
     #### If successful, show the result
-    #print(response.show(level=Response.DEBUG))
-    #response.data['message_stats'] = { 'n_results': message.n_results, 'id': message.id,
+    # print(response.show(level=Response.DEBUG))
+    # response.data['message_stats'] = { 'n_results': message.n_results, 'id': message.id,
     #    'reasoner_id': message.reasoner_id, 'tool_version': message.tool_version }
-    #response.data['message_stats']['confidence_scores'] = []
-    #for result in message.results:
+    # response.data['message_stats']['confidence_scores'] = []
+    # for result in message.results:
     #    response.data['message_stats']['confidence_scores'].append(result.confidence)
 
-    #print(json.dumps(ast.literal_eval(repr(response.data['parameters'])),sort_keys=True,indent=2))
-    #print(json.dumps(ast.literal_eval(repr(response.data['message_stats'])),sort_keys=True,indent=2))
+    # print(json.dumps(ast.literal_eval(repr(response.data['parameters'])),sort_keys=True,indent=2))
+    # print(json.dumps(ast.literal_eval(repr(response.data['message_stats'])),sort_keys=True,indent=2))
     # a comment on the end so you can better see the network on github
 
     # look at the response
-    #print(response.show(level=Response.DEBUG))
-    #print(response.show())
-    #print("Still executed")
+    # print(response.show(level=Response.DEBUG))
+    # print(response.show())
+    # print("Still executed")
 
     # look at the edges
-    #print(json.dumps(ast.literal_eval(repr(message.knowledge_graph.edges)),sort_keys=True,indent=2))
-    #print(json.dumps(ast.literal_eval(repr(message.knowledge_graph.nodes)), sort_keys=True, indent=2))
-    #print(json.dumps(ast.literal_eval(repr(message)), sort_keys=True, indent=2))
-    #print(response.show(level=Response.DEBUG))
+    # print(json.dumps(ast.literal_eval(repr(message.knowledge_graph.edges)),sort_keys=True,indent=2))
+    # print(json.dumps(ast.literal_eval(repr(message.knowledge_graph.nodes)), sort_keys=True, indent=2))
+    # print(json.dumps(ast.literal_eval(repr(message)), sort_keys=True, indent=2))
+    # print(response.show(level=Response.DEBUG))
 
     # just print off the values
-    #print(json.dumps(ast.literal_eval(repr(message.knowledge_graph.edges)), sort_keys=True, indent=2))
-    #for edge in message.knowledge_graph.edges:
+    # print(json.dumps(ast.literal_eval(repr(message.knowledge_graph.edges)), sort_keys=True, indent=2))
+    # for edge in message.knowledge_graph.edges:
     #    if hasattr(edge, 'edge_attributes') and edge.edge_attributes and len(edge.edge_attributes) >= 1:
     #        print(edge.edge_attributes.pop().value)
     print(json.dumps(ast.literal_eval(repr(message.knowledge_graph.edges)), sort_keys=True, indent=2))
     print(response.show(level=Response.DEBUG))
     print("Yet you still got here")
-    #print(actions_parser.parse(actions_list))
+    # print(actions_parser.parse(actions_list))
+
 
 if __name__ == "__main__": main()
