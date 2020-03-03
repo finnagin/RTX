@@ -22,7 +22,8 @@ class ARAXFilterKG:
             'remove_edges_by_type',
             'remove_edges_by_attribute',
             'remove_edges_by_property',
-            'remove_nodes_by_type'
+            'remove_nodes_by_type',
+            'remove_orphaned_nodes',
         }
         self.report_stats = True  # Set this to False when ready to go to production, this is only for debugging purposes
 
@@ -153,6 +154,20 @@ class ARAXFilterKG:
 
         # A little function to describe what this thing does
         if describe:
+            brief_description = """
+`remove_edges_by_type` removes edges from the knowledge graph (KG) based on a given edge type.
+Use cases include:
+             
+* removing all edges that have `edge_type=contraindicated_for`. 
+* if virtual edges have been introduced with `overlay()` DSL commands, this action can remove all of them.
+* etc.
+            
+You have the option to either remove all connected nodes to such edges (via `remove_connected_nodes=t`), or
+else, only remove a single source/target node based on a query node id (via `remove_connected_nodes=t, qnode_id=<a query node id.>`
+            
+This can be applied to an arbitrary knowledge graph as possible edge types are computed dynamically (i.e. not just those created/recognized by the ARA Expander team).
+"""
+            allowable_parameters['brief_description'] = brief_description
             return allowable_parameters
 
         # Make sure only allowable parameters and values have been passed
@@ -221,6 +236,22 @@ class ARAXFilterKG:
 
         # A little function to describe what this thing does
         if describe:
+            brief_description = """
+`remove_edges_by_property` removes edges from the knowledge graph (KG) based on a given edge property.
+Use cases include:
+                
+* removing all edges that were provided by a certain knowledge provider (KP) via `edge_property=provided, property_value=Pharos` to remove all edges provided by the KP Pharos.
+* removing all edges that connect to a certain node via `edge_property=source_id, property_value=DOID:8398`
+* removing all edges with a certain relation via `edge_property=relation, property_value=upregulates`
+* removing all edges provided by another ARA via `edge_property=is_defined_by, property_value=ARAX/RTX`
+* etc. etc.
+                
+You have the option to either remove all connected nodes to such edges (via `remove_connected_nodes=t`), or
+else, only remove a single source/target node based on a query node id (via `remove_connected_nodes=t, qnode_id=<a query node id.>`
+                
+This can be applied to an arbitrary knowledge graph as possible edge properties are computed dynamically (i.e. not just those created/recognized by the ARA Expander team).
+"""
+            allowable_parameters['brief_description'] = brief_description
             return allowable_parameters
 
         # Make sure only allowable parameters and values have been passed
@@ -296,6 +327,23 @@ class ARAXFilterKG:
 
         # A little function to describe what this thing does
         if describe:
+            brief_description = """
+`remove_edges_by_attribute` removes edges from the knowledge graph (KG) based on a a certain edge attribute.
+Edge attributes are a list of additional attributes for an edge.
+This action interacts particularly well with `overlay()` as `overlay()` frequently adds additional edge attributes.
+Use cases include:
+
+* removing all edges that have a normalized google distance above/below a certain value `edge_attribute=ngd, direction=above, threshold=0.85` (i.e. remove edges that aren't represented well in the literature)
+* removing all edges that Jaccard index above/below a certain value `edge_attribute=jaccard_index, direction=below, threshold=0.2` (i.e. all edges that have less than 20% of intermediate nodes in common)
+* removing all edges with clinical information satisfying some condition `edge_attribute=chi_square, direction=above, threshold=.005` (i.e. all edges that have a chi square p-value above .005)
+* etc. etc.
+                
+You have the option to either remove all connected nodes to such edges (via `remove_connected_nodes=t`), or
+else, only remove a single source/target node based on a query node id (via `remove_connected_nodes=t, qnode_id=<a query node id.>`
+                
+This can be applied to an arbitrary knowledge graph as possible edge attributes are computed dynamically (i.e. not just those created/recognized by the ARA Expander team).
+"""
+            allowable_parameters['brief_description'] = brief_description
             return allowable_parameters
 
         edge_params = self.parameters
@@ -368,6 +416,15 @@ class ARAXFilterKG:
 
         # A little function to describe what this thing does
         if describe:
+            brief_description = """
+`remove_node_by_type` removes nodes from the knowledge graph (KG) based on a given node type.
+Use cases include:
+* removing all nodes that have `node_type=protein`.
+* removing all nodes that have `node_type=chemical_substance`.
+* etc.
+This can be applied to an arbitrary knowledge graph as possible node types are computed dynamically (i.e. not just those created/recognized by the ARA Expander team).
+"""
+            allowable_parameters['brief_description'] = brief_description
             return allowable_parameters
 
         # Make sure only allowable parameters and values have been passed
@@ -382,6 +439,49 @@ class ARAXFilterKG:
         from Filter_KG.remove_nodes import RemoveNodes
         RN = RemoveNodes(self.response, self.message, node_params)
         response = RN.remove_nodes_by_type()
+        return response
+
+    def __remove_orphaned_nodes(self, describe=False):
+        """
+        Removes orphaned nodes from the KG nodes from the KG.
+        Allowable parameters: {'node_type': str,
+                                'node_property': str,}
+        :return:
+        """
+        message = self.message
+        parameters = self.parameters
+        # make a list of the allowable parameters (keys), and their possible values (values). Note that the action and corresponding name will always be in the allowable parameters
+        if message and parameters and hasattr(message, 'query_graph') and hasattr(message.query_graph, 'nodes'):
+            allowable_parameters = {'action': {'remove_orphaned_nodes'},
+                                    'node_type': set(
+                                        [t for x in self.message.knowledge_graph.nodes for t in x.type])
+                                    }
+        else:
+            allowable_parameters = {'action': {'remove_orphaned_nodes'},
+                                    'node_type': {'a node type (optional)'}}
+
+        # A little function to describe what this thing does
+        if describe:
+            brief_description = """
+`remove_orphaned_nodes` removes nodes from the knowledge graph (KG) that are not connected via any edges.
+Specifying a `node_type` will restrict this to only remove orphaned nodes of a certain type
+This can be applied to an arbitrary knowledge graph as possible node types are computed dynamically (i.e. not just those created/recognized by the ARA Expander team).
+"""
+            allowable_parameters['brief_description'] = brief_description
+            return allowable_parameters
+
+        # Make sure only allowable parameters and values have been passed
+        self.check_params(allowable_parameters)
+        # return if bad parameters have been passed
+        if self.response.status != 'OK':
+            return self.response
+
+        node_params = self.parameters
+
+        # now do the call out to NGD
+        from Filter_KG.remove_nodes import RemoveNodes
+        RN = RemoveNodes(self.response, self.message, node_params)
+        response = RN.remove_orphaned_nodes()
         return response
 
 ##########################################################################################
@@ -405,9 +505,10 @@ def main():
         #"filter_kg(action=remove_edges_by_type, edge_type=physically_interacts_with, remove_connected_nodes=false)",
         #"filter_kg(action=remove_edges_by_type, edge_type=physically_interacts_with, remove_connected_nodes=something)",
         #"filter(action=remove_nodes_by_type, node_type=protein)",
-        "overlay(action=compute_ngd)",
-        "filter(action=remove_edges_by_attribute, edge_attribute=ngd, threshold=.63, direction=below, remove_connected_nodes=t)",
+        #"overlay(action=compute_ngd)",
+        #"filter(action=remove_edges_by_attribute, edge_attribute=ngd, threshold=.63, direction=below, remove_connected_nodes=t)",
         #"filter(action=remove_edges_by_attribute, edge_attribute=ngd, threshold=.6, remove_connected_nodes=False)",
+        "filter(action=remove_orphaned_nodes)",
         "return(message=true,store=false)"
     ]
 
@@ -424,12 +525,13 @@ def main():
     from RTXFeedback import RTXFeedback
     araxdb = RTXFeedback()
 
-    message_dict = araxdb.getMessage(2)  # acetaminophen2proteins graph
+    #message_dict = araxdb.getMessage(2)  # acetaminophen2proteins graph
     # message_dict = araxdb.getMessage(13)  # ibuprofen -> proteins -> disease # work computer
     # message_dict = araxdb.getMessage(14)  # pleuropneumonia -> phenotypic_feature # work computer
     # message_dict = araxdb.getMessage(16)  # atherosclerosis -> phenotypic_feature  # work computer
     # message_dict = araxdb.getMessage(5)  # atherosclerosis -> phenotypic_feature  # home computer
     # message_dict = araxdb.getMessage(10)
+    message_dict = araxdb.getMessage(40)
 
     #### The stored message comes back as a dict. Transform it to objects
     from ARAX_messenger import ARAXMessenger
@@ -442,13 +544,13 @@ def main():
     #response.merge(result)
 
     # Apply overlay so you get an edge attribute to work with, then apply the filter
-    from ARAX_overlay import ARAXOverlay
-    overlay = ARAXOverlay()
-    result = overlay.apply(message, actions[0]['parameters'])
-    response.merge(result)
+    #from ARAX_overlay import ARAXOverlay
+    #overlay = ARAXOverlay()
+    #result = overlay.apply(message, actions[0]['parameters'])
+    #response.merge(result)
     # then apply the filter
     filterkg = ARAXFilterKG()
-    result = filterkg.apply(message, actions[1]['parameters'])
+    result = filterkg.apply(message, actions[0]['parameters'])
     response.merge(result)
 
     # if result.status != 'OK':

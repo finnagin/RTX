@@ -26,7 +26,9 @@ class ARAXOverlay:
             'compute_ngd',
             'overlay_clinical_info',
             'compute_jaccard',
-            'add_node_pmids'
+            'add_node_pmids',
+            'overlay_drug_disease_prob'
+
         }
         self.report_stats = True
 
@@ -93,6 +95,19 @@ class ARAXOverlay:
                         f"Supplied value {item} is not permitted. In action {allowable_parameters['action']}, allowable values to {key} are: {list(allowable_parameters[key])}",
                         error_code="UnknownValue")
 
+
+    # helper function to check if all virtual edge parameters have been properly provided
+    def check_virtual_edge_params(self, allowable_parameters):
+        parameters = self.parameters
+        if any([x in ['virtual_edge_type', 'source_qnode_id', 'target_qnode_id'] for x in parameters.keys()]):
+            if not all([x in parameters.keys() for x in ['virtual_edge_type', 'source_qnode_id', 'target_qnode_id']]):
+                self.response.error(f"If any of of the following parameters are provided ['virtual_edge_type', 'source_qnode_id', 'target_qnode_id'], all must be provided. Allowable parameters include: {allowable_parameters}")
+            elif parameters['source_qnode_id'] not in allowable_parameters['source_qnode_id']:
+                self.response.error(f"source_qnode_id value is not valid. Valid values are: {allowable_parameters['source_qnode_id']}")
+            elif parameters['target_qnode_id'] not in allowable_parameters['target_qnode_id']:
+                self.response.error(f"target_qnode_id value is not valid. Valid values are: {allowable_parameters['target_qnode_id']}")
+
+
     #### Top level decision maker for applying filters
     def apply(self, input_message, input_parameters):
 
@@ -155,11 +170,27 @@ class ARAXOverlay:
         Allowable parameters: {default_value: {'0', 'inf'}}
         :return:
         """
+        message = self.message
+        parameters = self.parameters
         # make a list of the allowable parameters (keys), and their possible values (values). Note that the action and corresponding name will always be in the allowable parameters
-        allowable_parameters = {'action': {'compute_ngd'}, 'default_value': {'0', 'inf'}}
+        #allowable_parameters = {'action': {'compute_ngd'}, 'default_value': {'0', 'inf'}}
+        if message and parameters and hasattr(message, 'query_graph') and hasattr(message.query_graph, 'edges'):
+            allowable_parameters = {'action': {'compute_ngd'}, 'default_value': {'0', 'inf'}, 'virtual_edge_type': {self.parameters['virtual_edge_type'] if 'virtual_edge_type' in self.parameters else None},
+                                    'source_qnode_id': set([x.id for x in self.message.query_graph.nodes]),
+                                    'target_qnode_id': set([x.id for x in self.message.query_graph.nodes])
+                                    }
+        else:
+            allowable_parameters = {'action': {'compute_ngd'}, 'default_value': {'0', 'inf'}, 'virtual_edge_type': {'any string label (optional, otherwise applied to all edges)'},
+                                    'source_qnode_id': {'a specific source query node id (optional, otherwise applied to all edges)'},
+                                    'target_qnode_id': {'a specific target query node id (optional, otherwise applied to all edges)'}
+                                    }
 
         # A little function to describe what this thing does
         if describe:
+            brief_description = """`compute_ngd` computes a metric (called the normalized Google distance) based on edge soure/target node co-occurrence in abstracts of all PubMed articles.
+            This information is then included as an edge attribute.
+            You have the choice of applying this to all edges in the knowledge graph, or only between specified source/target qnode id's. If the later, virtual edges are added with the type specified by `virtual_edge_type`."""
+            allowable_parameters['brief_description'] = brief_description
             return allowable_parameters
 
         # Make sure only allowable parameters and values have been passed
@@ -168,28 +199,44 @@ class ARAXOverlay:
         if self.response.status != 'OK':
             return self.response
 
-        ngd_params = {'default_value': np.inf}  # here is where you can set default values
+        # set the default value if it's not already done
+        if 'default_value' not in parameters:
+            parameters['default_value'] = np.inf
+        else:
+            if parameters['default_value'] == '0':
+                parameters['default_value'] = '0'
+            else:
+                parameters['default_value'] = float("-inf")
 
-        # parse the input parameters to be the data types I need them to be
-        for key, value in self.parameters.items():
-            if key != 'action':
-                if key == 'default_value':
-                    if value == '0':
-                        ngd_params[key] = 0
-                    elif value == 'inf':
-                        ngd_params[key] = np.inf
+        # Check if all virtual edge params have been provided properly
+        self.check_virtual_edge_params(allowable_parameters)
+        if self.response.status != 'OK':
+            return self.response
 
         # now do the call out to NGD
         from Overlay.compute_ngd import ComputeNGD
-        NGD = ComputeNGD(self.response, self.message, ngd_params)
+        NGD = ComputeNGD(self.response, self.message, parameters)
         response = NGD.compute_ngd()
         return response
 
-    def compute_probabilities(self):
-        from Overlay.predictor_.predictor import predictor
-        pred = predictor(model_file='Overlay/predictor_/LogModel.pkl')
-        pred.import_file(None, graph_file='Overlay/predictor_/rel_max.emb.gz', map_file='Overlay/predictor_/map.csv')
-        pred.single_test()
+    #### Compute drug disease probabilities. Double underscore means this is a private method
+    def __overlay_drug_disease_prob(self):
+
+        parameters = self.parameters
+        # set the default value if it's not already done
+        if 'default_value' not in parameters:
+            parameters['default_value'] = np.inf
+        else:
+            if parameters['default_value'] == '0':
+                parameters['default_value'] = '0'
+            else:
+                parameters['default_value'] = float("-inf")
+
+        from Overlay.overlay_drug_disease_prob import OverlayDDP
+        DDP = OverlayDDP(self.response, self.message, parameters)
+        response = DDP.compute_ddp()
+        #response = DDP.response
+        return response
 
     #### Compute confidence scores. Double underscore means this is a private method
     def __compute_confidence_scores(self, describe=False):
@@ -226,23 +273,46 @@ class ARAXOverlay:
 
         # make a list of the allowable parameters (keys), and their possible values (values). Note that the action and corresponding name will always be in the allowable parameters
         if message and parameters and hasattr(message, 'query_graph') and hasattr(message.query_graph, 'edges'):
-            allowable_parameters = {'action': {'overlay_clinical_info'}, 'paired_concept_freq': {'true', 'false'},
+
+            allowable_parameters = {'action': {'overlay_clinical_info'},
+                                    'paired_concept_freq': {'true', 'false'},
                                     'observed_expected_ratio': {'true', 'false'},
-                                    'virtual_edge_type': {self.parameters[
-                                                              'virtual_edge_type'] if 'virtual_edge_type' in self.parameters else None},
+                                    'chi_square': {'true', 'false'},
+                                    'virtual_edge_type': {self.parameters['virtual_edge_type'] if 'virtual_edge_type' in self.parameters else None},
+
                                     'source_qnode_id': set([x.id for x in self.message.query_graph.nodes]),
                                     'target_qnode_id': set([x.id for x in self.message.query_graph.nodes])
                                     }
         else:
-            allowable_parameters = {'action': {'overlay_clinical_info'}, 'paired_concept_freq': {'true', 'false'},
+
+            allowable_parameters = {'action': {'overlay_clinical_info'},
+                                    'paired_concept_freq': {'true', 'false'},
                                     'observed_expected_ratio': {'true', 'false'},
-                                    'virtual_edge_type': {'any string label (optional)'},
-                                    'source_qnode_id': {'a specific source query node id (optional)'},
-                                    'target_qnode_id': {'a specific target query node id (optional)'}
+                                    'chi_square': {'true', 'false'},
+                                    'virtual_edge_type': {'any string label (optional, otherwise applied to all edges)'},
+                                    'source_qnode_id': {'a specific source query node id (optional, otherwise applied to all edges)'},
+                                    'target_qnode_id': {'a specific target query node id (optional, otherwise applied to all edges)'}
+
                                     }
 
         # A little function to describe what this thing does
         if describe:
+            brief_description = """
+`overlay_clinical_info` overlay edges with information obtained from the knowledge provider (KP) Columbia Open Health Data (COHD).
+This KP has a number of different functionalities, such as `paired_concept_freq`, `observed_expected_ratio`, etc. which are mutually exclusive DSL parameters.
+All information is derived from a 5 year hierarchical dataset: Counts for each concept include patients from descendant concepts. 
+This includes clinical data from 2013-2017 and includes 1,731,858 different patients.
+This information is then included as an edge attribute.
+You have the choice of applying this to all edges in the knowledge graph, or only between specified source/target qnode id's. If the later, virtual edges are added with the type specified by `virtual_edge_type`.
+
+Note that this DSL command has quite a bit of functionality, so a brief description of the DSL parameters is given here:
+
+* `paired_concept_frequency`: If set to `true`, retrieves observed clinical frequencies of a pair of concepts indicated by edge source and target nodes and adds these values as edge attributes.
+* `observed_expected_ratio`: If set to `true`, returns the natural logarithm of the ratio between the observed count and expected count of edge source and target nodes. Expected count is calculated from the single concept frequencies and assuming independence between the concepts. This information is added as an edge attribute.
+* `chi_square`: If set to `true`, returns the chi-square statistic and p-value between pairs of concepts indicated by edge source/target nodes and adds these values as edge attributes. The expected frequencies for the chi-square analysis are calculated based on the single concept frequencies and assuming independence between concepts. P-value is calculated with 1 DOF.
+* `virtual_edge_type`: Overlays the requested information on virtual edges (ones that don't exist in the query graph).
+"""
+            allowable_parameters['brief_description'] = brief_description
             return allowable_parameters
 
         # Make sure only allowable parameters and values have been passed
@@ -251,25 +321,18 @@ class ARAXOverlay:
         if self.response.status != 'OK':
             return self.response
 
-        # check if conflicting parameters have been provided
-        mutually_exclusive_params = {'paired_concept_freq', 'observed_expected_ratio'}
+
+        #check if conflicting parameters have been provided
+        mutually_exclusive_params = {'paired_concept_freq', 'observed_expected_ratio', 'chi_square'}
         if np.sum([x in mutually_exclusive_params for x in parameters]) > 1:
             self.response.error(
                 f"The parameters {mutually_exclusive_params} are mutually exclusive. Please provide only one for each call to overlay(action=overlay_clinical_info)")
         if self.response.status != 'OK':
             return self.response
 
-        # check if all required parameters are provided
-        if any([x in ['virtual_edge_type', 'source_qnode_id', 'target_qnode_id'] for x in parameters.keys()]):
-            if not all([x in parameters.keys() for x in ['virtual_edge_type', 'source_qnode_id', 'target_qnode_id']]):
-                self.response.error(
-                    f"If any of of the following parameters are provided ['virtual_edge_type', 'source_qnode_id', 'target_qnode_id'], all must be provided. Allowable parameters include: {allowable_parameters}")
-            elif parameters['source_qnode_id'] not in allowable_parameters['source_qnode_id']:
-                self.response.error(
-                    f"source_qnode_id value is not valid. Valid values are: {allowable_parameters['source_qnode_id']}")
-            elif parameters['target_qnode_id'] not in allowable_parameters['target_qnode_id']:
-                self.response.error(
-                    f"target_qnode_id value is not valid. Valid values are: {allowable_parameters['target_qnode_id']}")
+
+        # Check if all virtual edge params have been provided properly
+        self.check_virtual_edge_params(allowable_parameters)
         if self.response.status != 'OK':
             return self.response
 
@@ -296,6 +359,10 @@ class ARAXOverlay:
 
         # A little function to describe what this thing does
         if describe:
+            brief_description = """`add_node_pmids` adds PubMed PMID's as node attributes to each node in the knowledge graph.
+            This information is obtained from mapping node identifiers to MeSH terms and obtaining which PubMed articles have this MeSH term
+            either labeling in the metadata or has the MeSH term occurring in the abstract of the article."""
+            allowable_parameters['brief_description'] = brief_description
             return allowable_parameters
 
         # Make sure only allowable parameters and values have been passed
@@ -352,14 +419,20 @@ class ARAXOverlay:
                                     }
         else:
             allowable_parameters = {'action': {'compute_jaccard'},
-                                    'start_node_id': {"a node id"},
-                                    'intermediate_node_id': {"a node id"},
-                                    'end_node_id': {"a node id"},
-                                    'virtual_edge_type': {"any string label"}
+                                    'start_node_id': {"a node id (required)"},
+                                    'intermediate_node_id': {"a query node id (required)"},
+                                    'end_node_id': {"a query node id (required)"},
+                                    'virtual_edge_type': {"any string label (required)"}
                                     }
         # print(allowable_parameters)
         # A little function to describe what this thing does
         if describe:
+            brief_description = """`compute_jaccard` creates virtual edges and adds an edge attribute containing the following information:
+            The jaccard similarity measures how many `intermediate_node_id`'s are shared in common between each `start_node_id` and `target_node_id`.
+            This is used for purposes such as "find me all drugs (`start_node_id`) that have many proteins (`intermediate_node_id`) in common with this disease (`end_node_id`)."
+            This can be used for downstream filtering to concentrate on relevant bioentities.
+            """
+            allowable_parameters['brief_description'] = brief_description
             return allowable_parameters
 
         # Make sure only allowable parameters and values have been passed
@@ -396,8 +469,7 @@ def main():
     #    "overlay(compute_confidence_scores=true)",
     #    "return(message=true,store=false)"
     # ]
-    o_temp = ARAXOverlay()
-    o_temp.compute_probabilities()
+
     actions_list = [
         # "overlay(action=compute_ngd)",
         # "overlay(action=overlay_clinical_info, paired_concept_freq=true)",
@@ -405,8 +477,16 @@ def main():
         # "overlay(action=compute_jaccard, start_node_id=n00, intermediate_node_id=n01, end_node_id=n02, virtual_edge_type=J1)",
         # "overlay(action=add_node_pmids)",
         #"overlay(action=overlay_clinical_info, observed_expected_ratio=true)",
-        "overlay(action=compute_probabilities)"
+        "overlay(action=overlay_drug_disease_prob)",
         # "overlay(action=overlay_clinical_info, paired_concept_freq=true, virtual_edge_type=P1, source_qnode_id=n00, target_qnode_id=n01)",
+        #"overlay(action=compute_ngd)",
+        #"overlay(action=compute_ngd, virtual_edge_type=NGD1, source_qnode_id=n00, target_qnode_id=n01)",
+        #"overlay(action=overlay_clinical_info, paired_concept_freq=true)",
+        # "overlay(action=overlay_clinical_info, paired_concept_freq=true, virtual_edge_type=P1, source_qnode_id=n00, target_qnode_id=n01)",
+        #"overlay(action=compute_jaccard, start_node_id=n00, intermediate_node_id=n01, end_node_id=n02, virtual_edge_type=J1)",
+        #"overlay(action=add_node_pmids)",
+        #"overlay(action=overlay_clinical_info, observed_expected_ratio=true)",
+        #"overlay(action=overlay_clinical_info, paired_concept_freq=true, virtual_edge_type=P1, source_qnode_id=n00, target_qnode_id=n01)",
         "return(message=true,store=false)"
     ]
 
@@ -425,12 +505,14 @@ def main():
 
     # message_dict = araxdb.getMessage(2)  # acetaminophen2proteins graph
     # message_dict = araxdb.getMessage(13)  # ibuprofen -> proteins -> disease # work computer
-    # message_dict = araxdb.getMessage(14)  # pleuropneumonia -> phenotypic_feature # work computer
-    # message_dict = araxdb.getMessage(16)  # atherosclerosis -> phenotypic_feature  # work computer
-    # message_dict = araxdb.getMessage(5)  # atherosclerosis -> phenotypic_feature  # home computer
-    # message_dict = araxdb.getMessage(10)
-    message_dict = araxdb.getMessage(4)  # test COHD obs/exp, via ARAX_query.py 16
 
+    #message_dict = araxdb.getMessage(14)  # pleuropneumonia -> phenotypic_feature # work computer
+    #message_dict = araxdb.getMessage(16)  # atherosclerosis -> phenotypic_feature  # work computer
+    #message_dict = araxdb.getMessage(5)  # atherosclerosis -> phenotypic_feature  # home computer
+    #message_dict = araxdb.getMessage(10)
+    #message_dict = araxdb.getMessage(36)  # test COHD obs/exp, via ARAX_query.py 16
+    #message_dict = araxdb.getMessage(39)  # ngd virtual edge test
+    message_dict = araxdb.getMessage(4)
 
     #### The stored message comes back as a dict. Transform it to objects
     from ARAX_messenger import ARAXMessenger
@@ -477,7 +559,8 @@ def main():
     # for edge in message.knowledge_graph.edges:
     #    if hasattr(edge, 'edge_attributes') and edge.edge_attributes and len(edge.edge_attributes) >= 1:
     #        print(edge.edge_attributes.pop().value)
-    print(json.dumps(ast.literal_eval(repr(message.knowledge_graph.edges)), sort_keys=True, indent=2))
+    print(f"Message: {json.dumps(ast.literal_eval(repr(message)), sort_keys=True, indent=2)}")
+    print(f"KG edges: {json.dumps(ast.literal_eval(repr(message.knowledge_graph.edges)), sort_keys=True, indent=2)}")
     print(response.show(level=Response.DEBUG))
     print("Yet you still got here")
     # print(actions_parser.parse(actions_list))

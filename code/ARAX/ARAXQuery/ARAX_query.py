@@ -7,12 +7,14 @@ import json
 import ast
 import re
 from datetime import datetime
+import subprocess
 
 from response import Response
 from query_graph_info import QueryGraphInfo
 from knowledge_graph_info import KnowledgeGraphInfo
 from actions_parser import ActionsParser
 from ARAX_filter import ARAXFilter
+from ARAX_resultify import ARAXResultify
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__))+"/../../UI/OpenAPI/python-flask-server/")
 from swagger_server.models.message import Message
@@ -60,10 +62,10 @@ class ARAXQuery:
 
 
     def query(self,query):
-
         #### Define a default response
         response = Response()
         self.response = response
+        #Response.output = 'STDERR'
         response.info(f"ARAXQuery launching")
 
         #### Determine a plan for what to do based on the input
@@ -153,7 +155,7 @@ class ARAXQuery:
 
             #### Set CWD to the QuestioningAnswering area and then invoke from the shell the Q1Solution code
             cwd = os.getcwd()
-            os.chdir(os.path.dirname(os.path.abspath(__file__))+"/../../../reasoningtool/QuestionAnswering")
+            os.chdir(os.path.dirname(os.path.abspath(__file__))+"/../../reasoningtool/QuestionAnswering")
             eprint(command)
             returnedText = subprocess.run( [ command ], stdout=subprocess.PIPE, shell=True )
             os.chdir(cwd)
@@ -262,20 +264,22 @@ class ARAXQuery:
 
     #### Get a previously stored message for this query from the database
     def executeProcessingPlan(self,inputEnvelope):
-
         response = self.response
         response.debug(f"Entering executeProcessingPlan")
         messages = []
         message = None
         message_id = None
         query = None
-
         #### Pull out the main processing plan envelope
         envelope = PreviousMessageProcessingPlan.from_dict(inputEnvelope["previous_message_processing_plan"])
 
         #### Connect to the message store just once, even if we won't use it
         rtxFeedback = RTXFeedback()
         rtxFeedback.connect()
+
+        #### Create a messenger object for basic message processing
+        from ARAX_messenger import ARAXMessenger
+        messenger = ARAXMessenger()
 
         #### If there are URIs provided, try to load them
         if envelope.previous_message_uris is not None:
@@ -290,10 +294,11 @@ class ARAXQuery:
                     referenced_message = rtxFeedback.getMessage(referenced_message_id)
                     #eprint(type(message))
                     if not isinstance(referenced_message,tuple):
-                        response.debug(f"Original question was: "+referenced_message["original_question"])
+                        referenced_message = ARAXMessenger().from_dict(referenced_message)
+                        response.debug(f"Original question was: {referenced_message.original_question}")
                         messages.append(referenced_message)
                         message_id = referenced_message_id
-                        query = { "query_type_id": referenced_message["query_type_id"], "restated_question": referenced_message["restated_question"], "terms": referenced_message["terms"] }
+                        query = { "query_type_id": referenced_message.query_type_id, "restated_question": referenced_message.restated_question, "terms": referenced_message.terms }
                     else:
                         response.error(f"Unable to load message_id {referenced_message_id}", error_code="CannotLoadMessageById")
                         return response
@@ -325,11 +330,12 @@ class ARAXQuery:
                     response.error(f"Uploaded message is not of type Message. It is of type"+str(uploadedMessage.__class__))
                     return response
 
-
         #### Take different actions based on the number of messages we now have in hand
         n_messages = len(messages)
         if n_messages == 0:
             response.debug(f"No starting messages were referenced. Will start with a blank template Message")
+            result = messenger.create_message()
+            message = result.data['message']
         elif n_messages == 1:
             response.debug(f"A single Message is ready and in hand")
             message = messages[0]
@@ -346,7 +352,8 @@ class ARAXQuery:
 
                 #finalMessage = self.merge_message(finalMessage,messageToMerge)
                 counter += 1
-        message = ast.literal_eval(repr(message))
+            message = ast.literal_eval(repr(message))
+            message = ARAXMessenger().from_dict(message)
 
         #### Examine the options that were provided and act accordingly
         optionsDict = {}
@@ -370,17 +377,15 @@ class ARAXQuery:
             #### Message suffers from a dual life as a dict and an object. above we seem to treat it as a dict. Fix that. FIXME
             #### Below we start treating it as and object. This should be the way forward.
             #### This is not a good place to do this, but may need to convert here
-            from ARAX_messenger import ARAXMessenger
             from ARAX_expander import ARAXExpander
             from ARAX_overlay import ARAXOverlay
             from ARAX_filter_kg import ARAXFilterKG
-            messenger = ARAXMessenger()
+            from ARAX_resultify import ARAXResultify
             expander = ARAXExpander()
             filter = ARAXFilter()
             overlay = ARAXOverlay()
             filter_kg = ARAXFilterKG()
-
-            message = ARAXMessenger().from_dict(message)
+            resultifier = ARAXResultify()
 
             #### Process each action in order
             action_stats = { }
@@ -390,7 +395,7 @@ class ARAXQuery:
                 nonstandard_result = False
 
                 if action['command'] == 'create_message':
-                    result = messenger.create()
+                    result = messenger.create_message()
                     message = result.data['message']
                 elif action['command'] == 'add_qnode':
                     result = messenger.add_qnode(message,action['parameters'])
@@ -400,6 +405,8 @@ class ARAXQuery:
                     result = expander.apply(message,action['parameters'])
                 elif action['command'] == 'filter':
                     result = filter.apply(message,action['parameters'])
+                elif action['command'] == 'resultify':
+                    result = resultifier.apply(message, action['parameters'])
                 elif action['command'] == 'query_graph_reasoner':
                     response.info(f"Sending current query_graph to the QueryGraphReasoner")
                     qgr = QueryGraphReasoner()
@@ -414,7 +421,6 @@ class ARAXQuery:
                     result = filter_kg.apply(message, action['parameters'])
                 else:
                     response.error(f"Unrecognized command {action['command']}", error_code="UnrecognizedCommand")
-                    print(response.show(level=Response.DEBUG))
                     return response
 
                 #### Merge down this result and end if we're in an error state
@@ -501,10 +507,11 @@ def main():
             "create_message",
             "add_qnode(curie=DOID:14330, id=n00)",
             "add_qnode(type=protein, is_set=True, id=n01)",
-            "add_qnode(type=drug, id=n02)",
+            #"add_qnode(type=chemical_substance, id=n02)",
             "add_qedge(source_id=n01, target_id=n00, id=e00)",
-            "add_qedge(source_id=n01, target_id=n02, id=e01)",
-            "return(message=true, store=false)",
+            #"add_qedge(source_id=n01, target_id=n02, id=e01)",
+            "expand(edge_id=e00)",
+            "return(message=true, store=true)",
             ] } }
     elif params.example_number == 4:
         query = { "previous_message_processing_plan": { "processing_actions": [
@@ -534,7 +541,11 @@ def main():
             "add_qnode(type=phenotypic_feature, is_set=True, id=n01)",
             "add_qedge(source_id=n00, target_id=n01, id=e00, type=has_phenotype)",
             "expand(edge_id=e00)",
-            "overlay(action=overlay_clinical_info, paired_concept_freq=true)",
+            #"overlay(action=overlay_clinical_info, paired_concept_freq=true)",
+            "overlay(action=overlay_clinical_info, chi_square=true, virtual_edge_type=C1, source_qnode_id=n00, target_qnode_id=n01)",
+            #"overlay(action=overlay_clinical_info, paired_concept_freq=true, virtual_edge_type=C1, source_qnode_id=n00, target_qnode_id=n01)",
+            #"overlay(action=compute_ngd)",
+            #"overlay(action=compute_ngd, virtual_edge_type=NGD1, source_qnode_id=n00, target_qnode_id=n01)",
             "filter(maximum_results=2)",
             "return(message=true, store=false)",
             ] } }
@@ -594,7 +605,7 @@ def main():
             "filter(maximum_results=2)",
             "return(message=true, store=false)",
             ] } }
-    elif params.example_number == 12:  # dry run of example 2 #TODO!!!!!
+    elif params.example_number == 12:  # dry run of example 2 # FIXME NOTE: this is our planned example 2 (so don't fix, it's just so it's highlighted in my IDE)
         query = { "previous_message_processing_plan": { "processing_actions": [
             "create_message",
             "add_qnode(name=DOID:14330, id=n00)",
@@ -606,6 +617,7 @@ def main():
             "overlay(action=compute_jaccard, start_node_id=n00, intermediate_node_id=n01, end_node_id=n02, virtual_edge_type=J1)",
             "filter_kg(action=remove_edges_by_attribute, edge_attribute=jaccard_index, direction=below, threshold=.2, remove_connected_nodes=t, qnode_id=n02)",
             "filter_kg(action=remove_edges_by_property, edge_property=provided_by, property_value=Pharos)",
+            "resultify(ignore_edge_direction=true, force_isset_false=[n02])",
             "return(message=true, store=false)",
             ] } }
     elif params.example_number == 13:  # add pubmed id's
@@ -618,7 +630,7 @@ def main():
             "overlay(action=add_node_pmids, max_num=15)",
             "return(message=true, store=false)"
         ]}}
-    elif params.example_number == 14:  # test out example 3
+    elif params.example_number == 14:  # test
         query = {"previous_message_processing_plan": {"processing_actions": [
             "create_message",
             "add_qnode(name=DOID:8712, id=n00)",
@@ -642,21 +654,21 @@ def main():
             ##"overlay(action=compute_ngd)",
             "return(message=true, store=false)"
         ]}}
-    elif params.example_number == 15:  # test out example 3, scrapping the complicated example, going simple
+    elif params.example_number == 15:  # FIXME NOTE: this is our planned example 3 (so don't fix, it's just so it's highlighted in my IDE)
         query = {"previous_message_processing_plan": {"processing_actions": [
             "create_message",
-            "add_qnode(name=DOID:631, id=n00)",
-            "add_qnode(type=phenotypic_feature, is_set=true, id=n01)",
-            "add_qedge(source_id=n00, target_id=n01, type=has_phenotype, id=e00)",
-            "expand(edge_id=e00)",
-            "overlay(action=compute_ngd)",
-            #"overlay(action=overlay_clinical_info, paired_concept_freq=true, virtual_edge_type=C1, source_qnode_id=n00, target_qnode_id=n01)",
-            #"filter_kg(action=remove_edges_by_attribute, edge_attribute=ngd, direction=above, threshold=100, remove_connected_nodes=f)",
-            #"add_qnode(type=protein, is_set=true, id=n02)",
-            #"add_qedge(source_id=n02, target_id=n01, id=e01)",
-            #"expand(edge_id=e01)",
-            #"filter_kg(action=remove_edges_by_attribute, edge_attribute=ngd, direction=above, threshold=100, remove_connected_nodes=f)",
-            #"filter_kg(action=remove_edges_by_type, edge_type=C1, remove_connected_nodes=false)",
+            "add_qnode(name=DOID:9406, id=n00)",  # hypopituitarism
+            "add_qnode(type=chemical_substance, is_set=true, id=n01)",  # look for all drugs associated with this disease (29 total drugs)
+            "add_qnode(type=protein, is_set=true, id=n02)",   # look for proteins associated with these diseases (240 total proteins)
+            "add_qedge(source_id=n00, target_id=n01, id=e00)",  # get connections
+            "add_qedge(source_id=n01, target_id=n02, id=e01)",  # get connections
+            "expand(edge_id=[e00,e01])",  # expand the query graph
+            "overlay(action=overlay_clinical_info, observed_expected_ratio=true, virtual_edge_type=C1, source_qnode_id=n00, target_qnode_id=n01)",  # Look in COHD to find which drug are being used to treat this disease based on the log ratio of expected frequency of this drug being used to treat a disease, vs. the observed number of times it’s used to treat this disease
+            "filter_kg(action=remove_edges_by_attribute, edge_attribute=observed_expected_ratio, direction=below, threshold=3, remove_connected_nodes=t, qnode_id=n01)",   # concentrate only on those drugs that are more likely to be treating this disease than expected
+            "filter_kg(action=remove_orphaned_nodes, node_type=protein)",  # remove proteins that got disconnected as a result of this filter action
+            "overlay(action=compute_ngd, virtual_edge_type=N1, source_qnode_id=n01, target_qnode_id=n02)",   # use normalized google distance to find how frequently the protein and the drug are mentioned in abstracts
+            "filter_kg(action=remove_edges_by_attribute, edge_attribute=ngd, direction=above, threshold=0.85, remove_connected_nodes=t, qnode_id=n02)",   # remove proteins that are not frequently mentioned together in PubMed abstracts
+            "resultify(ignore_edge_direction=true, force_isset_false=[n02])",
             "return(message=true, store=false)"
         ]}}
     elif params.example_number == 16:  # To test COHD obs/exp ratio
@@ -668,8 +680,31 @@ def main():
             "expand(edge_id=e00)",
             "return(message=true, store=true)"
         ]}}
+    elif params.example_number == 17:  # Test resultify #FIXME: this returns a single result instead of a list (one for each disease/phenotype found)
+        query = {"previous_message_processing_plan": {"processing_actions": [
+            "create_message",
+            "add_qnode(name=DOID:731, id=n00, type=disease, is_set=false)",
+            "add_qnode(type=phenotypic_feature, is_set=false, id=n01)",
+            "add_qedge(source_id=n00, target_id=n01, id=e00)",
+            "expand(edge_id=e00)",
+            'resultify(ignore_edge_direction=true)',
+            "return(message=true, store=false)"
+        ]}}
+    elif params.example_number == 18:  # test removing orphaned nodes
+        query = {"previous_message_processing_plan": {"processing_actions": [
+            "create_message",
+            "add_qnode(name=DOID:9406, id=n00)",
+            "add_qnode(type=chemical_substance, is_set=true, id=n01)",
+            "add_qnode(type=protein, is_set=true, id=n02)",
+            "add_qedge(source_id=n00, target_id=n01, id=e00)",
+            "add_qedge(source_id=n01, target_id=n02, id=e01, type=physically_interacts_with)",
+            "expand(edge_id=[e00, e01])",
+            "filter_kg(action=remove_edges_by_type, edge_type=physically_interacts_with, remove_connected_nodes=f)",
+            "filter_kg(action=remove_orphaned_nodes, node_type=protein)",
+            "return(message=true, store=false)"
+        ]}}
     else:
-        eprint(f"Invalid test number {params.example_number}. Try 1 through 7")
+        eprint(f"Invalid test number {params.example_number}. Try 1 through 17")
         return
 
     if 0:
@@ -688,6 +723,7 @@ def main():
 
     #### Print out the message that came back
     #print(response.show(level=Response.DEBUG))
+    #print("Returned message:\n")
     #print(json.dumps(ast.literal_eval(repr(message)),sort_keys=True,indent=2))
     #print(json.dumps(ast.literal_eval(repr(message.id)), sort_keys=True, indent=2))
     #print(json.dumps(ast.literal_eval(repr(message.knowledge_graph.edges)), sort_keys=True, indent=2))
@@ -696,6 +732,14 @@ def main():
     print(json.dumps(ast.literal_eval(repr(message.id)), sort_keys=True, indent=2))
     #print(response.show(level=Response.DEBUG))
     print(response.show(level=Response.DEBUG))
+    print(f"Number of results: {len(message.results)}")
+    #print(json.dumps(ast.literal_eval(repr(message.results[0])), sort_keys=True, indent=2))
+    #print(json.dumps(ast.literal_eval(repr(message.results)), sort_keys=True, indent=2))
+    #print(set.union(*[set(x.qg_id for x in r.edge_bindings if x.qg_id.startswith('J')) for r in message.results]))
+    try:
+        print(f"Result qg_id's in results: {set.union(*[set(x.qg_id for x in r.edge_bindings) for r in message.results])}")
+    except:
+        pass
 
     from collections import Counter
     vals = []
@@ -704,20 +748,70 @@ def main():
             for attr in edge.edge_attributes:
                 vals.append((attr.name, attr.value))
 
-    print(sorted(Counter(vals).items(), key=lambda x:x[0][1]))
+    #print(sorted(Counter(vals).items(), key=lambda x:float(x[0][1])))
+
     #for node in message.knowledge_graph.nodes:
     #    print(f"{node.name} {node.type[0]}")
     #     print(node.qnode_id)
-    if False:
+    if True:
         proteins = []
         for node in message.knowledge_graph.nodes:
             if node.type[0] == "protein":
-                proteins.append(node.name)
+                proteins.append(node.id)
         #for protein in sorted(proteins):
         #    print(f"{protein}")
-        known_proteins = []
-        print(len(set(known_proteins).intersection(set(proteins))))  # fill these in after finding a good example
+        known_proteins = ["UniProtKB:P16473",
+"UniProtKB:P05093",
+"UniProtKB:P06401",
+"UniProtKB:P08235",
+"UniProtKB:P18405",
+"UniProtKB:P03372",
+"UniProtKB:P10275",
+"UniProtKB:P11511",
+"UniProtKB:P19838",
+"UniProtKB:Q13936",
+"UniProtKB:Q16665",
+"UniProtKB:P22888",
+"UniProtKB:Q9HB55",
+"UniProtKB:P05108",
+"UniProtKB:P08684",
+"UniProtKB:Q92731",
+"UniProtKB:P80365",
+"UniProtKB:P24462",
+"UniProtKB:P04278",
+"UniProtKB:P31213",
+"UniProtKB:P08842",
+"UniProtKB:Q15125",
+"UniProtKB:P04150",
+"UniProtKB:P37058",
+"UniProtKB:P54132",
+"UniProtKB:P24462",
+"UniProtKB:P80365",
+"UniProtKB:Q92731",
+"UniProtKB:P04278",
+"UniProtKB:P31213",
+"UniProtKB:Q15125",
+"UniProtKB:P08842",
+"UniProtKB:P16473",
+"UniProtKB:P08235",
+"UniProtKB:P05093",
+"UniProtKB:P06401",
+"UniProtKB:P18405",
+"UniProtKB:P54132",
+"UniProtKB:P04150",
+"UniProtKB:P37058",
+"UniProtKB:P08684",
+"UniProtKB:P22888",
+"UniProtKB:P05108",
+"UniProtKB:Q9HB55",
+"UniProtKB:Q13936",
+"UniProtKB:P19838",
+"UniProtKB:P11511",
+"UniProtKB:P10275",
+"UniProtKB:Q16665",
+"UniProtKB:P03372"]
+        print(f"For example 15 (demo eg. 3), number of TP proteins: {len(set(known_proteins).intersection(set(proteins)))}")  # fill these in after finding a good example
 
-    print(Counter([x.provided_by for x in message.knowledge_graph.edges]))
+    print(f"Number of KnowledgeProviders in KG: {Counter([x.provided_by for x in message.knowledge_graph.edges])}")
 
 if __name__ == "__main__": main()

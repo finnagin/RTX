@@ -26,3 +26,5 @@ CacheControl
 lockfile
 simple-crypt
 tomark
+md-toc
+pickledb

@@ -1,4 +1,4 @@
-# This class will overlay the normalized google distance on a message (all edges)
+# This class will overlay the drug disease probabilities on a message (all edges)
 #!/bin/env python3
 import sys
 import os
@@ -13,10 +13,11 @@ from swagger_server.models.edge_attribute import EdgeAttribute
 from swagger_server.models.edge import Edge
 from swagger_server.models.q_edge import QEdge
 sys.path.append(os.path.dirname(os.path.abspath(__file__))+"/../../reasoningtool/kg-construction/")
-from NormGoogleDistance import NormGoogleDistance as NGD
+
+from Overlay.predictor_.predictor import predictor
 
 
-class ComputeNGD:
+class OverlayDDP:
 
     #### Constructor
     def __init__(self, response, message, parameters):
@@ -24,17 +25,21 @@ class ComputeNGD:
         self.message = message
         self.parameters = parameters
         self.global_iter = 0
+        self.pred = predictor(model_file='Overlay/predictor_/LogModel.pkl')
+        self.pred.import_file(None, graph_file='Overlay/predictor_/rel_max.emb.gz', map_file='Overlay/predictor_/map.csv')
+        self.pred.single_test()
+        #self.response.debug(f"Computing DDP")
 
-    def compute_ngd(self):
+    def compute_ddp(self):
         """
-        Iterate over all the edges in the knowledge graph, compute the normalized google distance and stick that info
+        Iterate over all the edges in the knowledge graph, compute the drug disease probabilities and stick that info
         on the edge_attributes
-        :default: The default value to set for NGD if it returns a nan
+        :default: The default value to set for DDP if it returns a nan
         :return: response
         """
         parameters = self.parameters
-        self.response.debug(f"Computing NGD")
-        self.response.info(f"Computing the normalized Google distance: weighting edges based on source/target node "
+        self.response.debug(f"Computing DDP")
+        self.response.info(f"Computing the drug disease probabilities: weighting edges based on source/target node "
                            f"co-occurrence frequency in PubMed abstracts")
 
         self.response.info("Converting CURIE identifiers to human readable names")
@@ -50,7 +55,7 @@ class ComputeNGD:
 
 
         self.response.warning(f"Utilizing API calls to NCBI eUtils, so this may take a while...")
-        name = "ngd"
+        name = "ddp"
         type = "float"
         value = self.parameters['default_value']
         url = "https://arax.rtx.ai/api/rtx/v1/ui/#/PubmedMeshNgd"
@@ -123,22 +128,24 @@ class ComputeNGD:
                     # Make sure the edge_attributes are not None
                     if not edge.edge_attributes:
                         edge.edge_attributes = []  # should be an array, but why not a list?
-                    # now go and actually get the NGD
+                    # now go and actually get the DDP
                     source_curie = edge.source_id
                     target_curie = edge.target_id
                     source_name = node_curie_to_name[source_curie]
                     target_name = node_curie_to_name[target_curie]
-                    ngd_value = NGD.get_ngd_for_all([source_curie, target_curie], [source_name, target_name])
-                    if np.isfinite(ngd_value):  # if ngd is finite, that's ok, otherwise, stay with default
-                        value = ngd_value
-                    ngd_edge_attribute = EdgeAttribute(type=type, name=name, value=str(value), url=url)  # populate the NGD edge attribute
-                    edge.edge_attributes.append(ngd_edge_attribute)  # append it to the list of attributes
+
+                    #ngd_value = 123456
+                    ddp_value = self.pred.prob_single('ChEMBL:'+source_curie[22:],target_curie)
+                    if np.isfinite(ddp_value):  # if ddp is finite, that's ok, otherwise, stay with default
+                        value = ddp_value
+                    ddp_edge_attribute = EdgeAttribute(type=type, name=name, value=str(value), url=url)  # populate the DDP edge attribute
+                    edge.edge_attributes.append(ddp_edge_attribute)  # append it to the list of attributes
             except:
                 tb = traceback.format_exc()
                 error_type, error, _ = sys.exc_info()
                 self.response.error(tb, error_code=error_type.__name__)
-                self.response.error(f"Something went wrong adding the NGD edge attributes")
+                self.response.error(f"Something went wrong adding the DDP edge attributes")
             else:
-                self.response.info(f"NGD values successfully added to edges")
+                self.response.info(f"DDP values successfully added to edges")
 
             return self.response
