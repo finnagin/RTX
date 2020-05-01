@@ -25,6 +25,7 @@ import os
 import sys
 from typing import List, Dict, Set, Union
 from response import Response
+import traceback
 
 __author__ = 'Stephen Ramsey'
 __copyright__ = 'Oregon State University'
@@ -197,7 +198,10 @@ Note that this command will successfully execute given an arbitrary query graph 
             if not debug_mode:
                 code_description = str(e)
                 message_code = e.__class__.__name__
-                self.response.error(code_description)
+                self.response.error(f"is it here? {code_description}")
+                tb = traceback.format_exc()
+                error_type, error, _ = sys.exc_info()
+                self.response.error(tb, error_code=error_type.__name__)
                 results = []
             else:
                 raise e
