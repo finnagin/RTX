@@ -905,12 +905,12 @@ def main():
             "create_message",
             "add_qnode(name=MONDO:0005737, id=n0, type=disease)",
             "add_qnode(type=protein, id=n1)",
-            "add_qnode(type=disease, id=n2)",
+            #"add_qnode(type=disease, id=n2)",
             "add_qedge(source_id=n0, target_id=n1, id=e0)",
-            "add_qedge(source_id=n1, target_id=n2, id=e1)",
-            "expand(edge_id=[e0,e1], kp=ARAX/KG2)",
-            "resultify(ignore_edge_direction=true)",
-            "return(message=true, store=true)"
+            #"add_qedge(source_id=n1, target_id=n2, id=e1)",
+            "expand(edge_id=[e0], kp=ARAX/KG2)",
+            #"resultify(ignore_edge_direction=true)",
+            "return(message=true, store=false)"
         ]}}
     elif params.example_number == 2018211471:  # Trung's query: https://github.com/NCATSTranslator/Relay/blob/master/tr_sys/tr_ars/ars_query.json
         # BTE Just plain doesn't work, probably due to BTE not knowing about OMIM

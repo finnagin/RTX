@@ -166,7 +166,7 @@ class KGQuerier:
                         swagger_node = self.__convert_kg2_node_to_swagger_node(node, qnode_id)
                     else:
                         swagger_node = self.__convert_kg1_node_to_swagger_node(node, qnode_id)
-
+                    print(f"{swagger_node.qnode_id}: {swagger_node.id}")
                     # Add this swagger node to the KG, depending on how we're handling synonyms
                     if synonym_handling == 'map_back' and qnode_id in synonym_usages_dict:
                         # Only keep the node corresponding to the original curie (discard synonym nodes)
