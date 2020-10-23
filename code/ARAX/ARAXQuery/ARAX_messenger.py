@@ -395,7 +395,7 @@ class ARAXMessenger:
                     'type': 'string',
                     'description': 'Any valid Translator/BioLink relationship type (e.g. physically_interacts_with, participates_in)',
                     },
-                'negated': {
+                'not_edge': {
                     'is_required': False,
                     'enum': [ 't', 'T', 'f', 'F', 'true', 'True', 'false', 'False'],
                     'type': 'string',
@@ -425,7 +425,8 @@ class ARAXMessenger:
             'source_id': None,
             'target_id': None,
             'type': None,
-            'negated': False,
+            'negated': None,
+            'not_edge': False,
         }
 
         #### Loop through the input_parameters and override the defaults and make sure they are allowed
@@ -434,12 +435,12 @@ class ARAXMessenger:
                 response.error(f"Supplied parameter {key} is not permitted", error_code="UnknownParameter")
             else:
                 parameters[key] = value
-        if parameters['negated'] in {'t', 'T', 'true', 'True'}:
-            parameters['negated'] = True
-        elif parameters['negated'] in {'f', 'F', 'false', 'False'}:
-            parameters['negated'] = False
-        elif parameters['negated'] not in {True, False}:
-            response.error(f"Supplied input, {parameters['negated']}, for the 'negated' parameter is not valid. Acceptable inputs are t, T, f, F, true, True, false, and False.", error_code="UnknownInput")
+        if parameters['not_edge'] in {'t', 'T', 'true', 'True'}:
+            parameters['not_edge'] = True
+        elif parameters['not_edge'] in {'f', 'F', 'false', 'False'}:
+            parameters['not_edge'] = False
+        elif parameters['not_edge'] not in {True, False}:
+            response.error(f"Supplied input, {parameters['not_edge']}, for the 'not_edge' parameter is not valid. Acceptable inputs are t, T, f, F, true, True, false, and False.", error_code="UnknownInput")
 
         #### Return if any of the parameters generated an error (showing not just the first one)
         if response.status != 'OK':
@@ -502,8 +503,8 @@ class ARAXMessenger:
         if parameters['type'] is not None:
             qedge.type = parameters['type']
 
-        if parameters['negated'] is not None:
-            qedge.negated = parameters['negated']
+        if parameters['not_edge'] is not None:
+            qedge.negated = parameters['not_edge']
 
         #### Add it to the query_graph edge list
         message.query_graph.edges.append(qedge)

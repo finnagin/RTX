@@ -441,9 +441,11 @@ class RemoveEdges:
             edge_qid_dict = {}
             negated_set = set()
             for q_edge in self.message.query_graph.edges:
-                edge_qid_dict[q_edge.id] = {'source':q_edge.source_id, 'target':q_edge.target_id}
-                if q_edge.negated:
-                    negated_set.add((q_edge.source_id,q_edge.target_id))
+                edge_qid_dict[q_edge.id] = {'source':q_edge.source_id, 'target':q_edge.target_id, 'negated': q_edge.not_edge}
+            for edge in self.message.knowledge_graph.edges:
+                for qedge_id in edge.qedge_ids:
+                    if edge_qid_dict[qedge_id]['negated']:
+                        negated_set.add((edge.source_id,edge.target_id))
             # iterate over the edges find the edges to remove
             for edge in self.message.knowledge_graph.edges:
                 if (edge.source_id,edge.target_id) in negated_set:

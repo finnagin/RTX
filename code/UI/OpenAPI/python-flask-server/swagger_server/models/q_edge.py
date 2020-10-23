@@ -16,7 +16,7 @@ class QEdge(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, id: str=None, type: BiolinkRelation=None, relation: str=None, source_id: str=None, target_id: str=None, negated: bool=None):  # noqa: E501
+    def __init__(self, id: str=None, type: BiolinkRelation=None, relation: str=None, source_id: str=None, target_id: str=None, negated: bool=None, not_edge: bool=None):  # noqa: E501
         """QEdge - a model defined in Swagger
 
         :param id: The id of this QEdge.  # noqa: E501
@@ -31,6 +31,8 @@ class QEdge(Model):
         :type target_id: str
         :param negated: The negated of this QEdge.  # noqa: E501
         :type negated: bool
+        :param not_edge: The not_edge of this QEdge.  # noqa: E501
+        :type not_edge: bool
         """
         self.swagger_types = {
             'id': str,
@@ -38,7 +40,8 @@ class QEdge(Model):
             'relation': str,
             'source_id': str,
             'target_id': str,
-            'negated': bool
+            'negated': bool,
+            'not_edge': bool
         }
 
         self.attribute_map = {
@@ -47,7 +50,8 @@ class QEdge(Model):
             'relation': 'relation',
             'source_id': 'source_id',
             'target_id': 'target_id',
-            'negated': 'negated'
+            'negated': 'negated',
+            'not_edge': 'not_edge'
         }
 
         self._id = id
@@ -56,6 +60,7 @@ class QEdge(Model):
         self._source_id = source_id
         self._target_id = target_id
         self._negated = negated
+        self._not_edge = not_edge
 
     @classmethod
     def from_dict(cls, dikt) -> 'QEdge':
@@ -209,3 +214,26 @@ class QEdge(Model):
         """
 
         self._negated = negated
+
+    @property
+    def not_edge(self) -> bool:
+        """Gets the negated of this QEdge.
+
+        Boolean that if set to true, indicates the edge statement is looking to query for not this edge. i.e. don't return results with this edge  # noqa: E501
+
+        :return: The not_edge of this QEdge.
+        :rtype: bool
+        """
+        return self._not_edge
+
+    @negated.setter
+    def not_edge(self, not_edge: bool):
+        """Sets the negated of this QEdge.
+
+        Boolean that if set to true, indicates the edge statement is looking to query for not this edge. i.e. don't return results with this edge  # noqa: E501
+
+        :param not_edge: The not_edge of this QEdge.
+        :type not_edge: bool
+        """
+
+        self._not_edge = not_edge

@@ -47,7 +47,28 @@ def test_not_flag():
             "add_qnode(name=DOID:3312, id=n00)",
             "add_qnode(type=chemical_substance, id=n01)",
             "add_qedge(source_id=n00, target_id=n01, type=indicated_for, id=e00)",
-            "add_qedge(source_id=n00, target_id=n01, type=contraindicated_for, negated=true, id=e01)",
+            "add_qedge(source_id=n00, target_id=n01, type=contraindicated_for, not_edge=true, id=e01)",
+            "expand(edge_id=[e00,e01])",
+            #"filter_kg(action=remove_negated_edges)",
+            #"resultify(ignore_edge_direction=true)",
+            #"filter_results(action=limit_number_of_results, max_results=20)",
+            #"return(message=true, store=false)"
+        ]}}
+    [no_filter_response, no_filter_message] = _do_arax_query(query)
+    edge_qid_dict = {}
+    negated_set = set()
+    for q_edge in no_filter_message.query_graph.edges:
+        edge_qid_dict[q_edge.id] = {'source':q_edge.source_id, 'target':q_edge.target_id, 'negated': q_edge.not_edge}
+    for edge in no_filter_message.knowledge_graph.edges:
+        for qedge_id in edge.qedge_ids:
+            if edge_qid_dict[qedge_id]['negated']:
+                negated_set.add((edge.source_id,edge.target_id))
+    query = {"previous_message_processing_plan": {"processing_actions": [
+            "create_message",
+            "add_qnode(name=DOID:3312, id=n00)",
+            "add_qnode(type=chemical_substance, id=n01)",
+            "add_qedge(source_id=n00, target_id=n01, type=indicated_for, id=e00)",
+            "add_qedge(source_id=n00, target_id=n01, type=contraindicated_for, not_edge=true, id=e01)",
             "expand(edge_id=[e00,e01])",
             "filter_kg(action=remove_negated_edges)",
             #"resultify(ignore_edge_direction=true)",
@@ -58,9 +79,12 @@ def test_not_flag():
     assert response.status == 'OK'
     for edge in message.query_graph.edges:
         if edge.id == 'e01':
-            assert edge.negated
+            assert edge.not_edge
         if edge.id == 'e00':
-            assert not edge.negated
+            assert not edge.not_edge
+    for edge in message.knowledge_graph.edges:
+        assert edge.type != 'contraindicated_for'
+        assert (edge.source_id,edge.target_id) not in negated_set
 
 def test_warning():
     query = {"previous_message_processing_plan": {"processing_actions": [
