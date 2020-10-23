@@ -399,7 +399,7 @@ class ARAXMessenger:
                     'is_required': False,
                     'enum': [ 't', 'T', 'f', 'F', 'true', 'True', 'false', 'False'],
                     'type': 'string',
-                    'description': 'A string to indicate weather to only include results without this edge.',
+                    'description': 'A string to indicate whether or not to only include results not connected by this edge.',
                     'default': 'False',
                     },
             }
