@@ -425,3 +425,85 @@ class RemoveEdges:
             self.response.info(f"Edges successfully removed")
 
         return self.response
+
+    def remove_negated_edges(self):
+        """
+        Iterate over all the edges in the knowledge graph, remove any edges parallel to negated edges.
+        :return: response
+        """
+        self.response.debug(f"Removing Edges")
+        self.response.info(f"Removing negated edges from knowledge graph")
+        edge_params = self.edge_parameters
+        try:
+            i = 0
+            edges_to_remove = set()
+            node_ids_to_remove = {}
+            edge_qid_dict = {}
+            negated_set = set()
+            for q_edge in self.message.query_graph.edges:
+                edge_qid_dict[q_edge.id] = {'source':q_edge.source_id, 'target':q_edge.target_id}
+                if q_edge.negated:
+                    negated_set.add((q_edge.source_id,q_edge.target_id))
+            # iterate over the edges find the edges to remove
+            for edge in self.message.knowledge_graph.edges:
+                if (edge.source_id,edge.target_id) in negated_set:
+                    edges_to_remove.add(i)
+                    if edge_params['remove_connected_nodes']:
+                        for qedge_id in edge.qedge_ids:
+                            if edge.source_id not in node_ids_to_remove:
+                                node_ids_to_remove[edge.source_id] = {edge_qid_dict[qedge_id]['source']}
+                            else:
+                                node_ids_to_remove[edge.source_id].add(edge_qid_dict[qedge_id]['source'])
+                            if edge.target_id not in node_ids_to_remove:
+                                node_ids_to_remove[edge.target_id] = {edge_qid_dict[qedge_id]['target']}
+                            else:
+                                node_ids_to_remove[edge.target_id].add(edge_qid_dict[qedge_id]['target'])
+                i += 1
+            if edge_params['remove_connected_nodes']:
+                self.response.debug(f"Removing Nodes")
+                self.response.info(f"Removing connected nodes and their edges from the knowledge graph")
+                i = 0
+                nodes_to_remove = set()
+                # iterate over nodes find adjacent connected nodes
+                for node in self.message.knowledge_graph.nodes:
+                    if node.id in node_ids_to_remove:
+                        if 'qnode_id' in edge_params:
+                            if node.qnode_ids is not None:
+                                if edge_params['qnode_id'] in node.qnode_ids:
+                                    if len(node.qnode_ids) == 1:
+                                        nodes_to_remove.add(i)
+                                    else:
+                                        node.qnode_ids.remove(edge_params['qnode_id'])
+                                else:
+                                    del node_ids_to_remove[node.id]
+                            else:
+                                del node_ids_to_remove[node.id]
+                        else:
+                            if len(node.qnode_ids) == 1:
+                                nodes_to_remove.add(i)
+                            else:
+                                for node_id in node_ids_to_remove[node.id]:
+                                    node.qnode_ids.remove(node_id)
+                                if len(node.qnode_ids) == 0:
+                                    nodes_to_remove.add(i)
+                    i += 1
+                # remove connected nodes
+                self.message.knowledge_graph.nodes = [val for idx,val in enumerate(self.message.knowledge_graph.nodes) if idx not in nodes_to_remove]
+                i = 0
+                # iterate over edges find edges connected to the nodes
+                for edge in self.message.knowledge_graph.edges:
+                    if edge.source_id in node_ids_to_remove or edge.target_id in node_ids_to_remove:
+                        edges_to_remove.add(i)
+                    i += 1
+                self.check_kg_nodes()
+            # remove edges
+            self.message.knowledge_graph.edges = [val for idx,val in enumerate(self.message.knowledge_graph.edges) if idx not in edges_to_remove]
+        except:
+            tb = traceback.format_exc()
+            error_type, error, _ = sys.exc_info()
+            self.response.error(tb, error_code = error_type.__name__)
+            self.response.error(f"Something went wrong removing edges from the knowledge graph")
+        else:
+            self.response.info(f"Edges successfully removed")
+
+        return self.response

@@ -49,7 +49,7 @@ def test_not_flag():
             "add_qedge(source_id=n00, target_id=n01, type=indicated_for, id=e00)",
             "add_qedge(source_id=n00, target_id=n01, type=contraindicated_for, negated=true, id=e01)",
             "expand(edge_id=[e00,e01])",
-            #"filter_kg(action=remove_edges_by_attribute, edge_attribute=asdfghjkl, direction=below, threshold=.2)",
+            "filter_kg(action=remove_negated_edges)",
             #"resultify(ignore_edge_direction=true)",
             #"filter_results(action=limit_number_of_results, max_results=20)",
             #"return(message=true, store=false)"

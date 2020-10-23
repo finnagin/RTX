@@ -25,6 +25,7 @@ class ARAXFilterKG:
             'remove_nodes_by_type',
             'remove_nodes_by_property',
             'remove_orphaned_nodes',
+            'remove_negated_edges',
         }
         self.report_stats = True  # Set this to False when ready to go to production, this is only for debugging purposes
 
@@ -728,6 +729,69 @@ This can be applied to an arbitrary knowledge graph as possible node types are c
         from Filter_KG.remove_nodes import RemoveNodes
         RN = RemoveNodes(self.response, self.message, node_params)
         response = RN.remove_orphaned_nodes()
+        return response
+
+    def __remove_negated_edges(self, describe=False):
+        """
+        Removes all edges which are parallel to negated edges from the KG.
+        Allowable parameters: {'remove_connected_nodes': str,
+                                'qnode_id': str}
+        :return:
+        """
+        message = self.message
+        parameters = self.parameters
+        # make a list of the allowable parameters (keys), and their possible values (values). Note that the action and corresponding name will always be in the allowable parameters
+        if message and parameters and hasattr(message, 'query_graph') and hasattr(message.query_graph, 'edges'):
+            allowable_parameters = {'action': {'remove_negated_edges'},
+                                    'remove_connected_nodes': {'true', 'false', 'True', 'False', 't', 'f', 'T', 'F'},
+                                    'qnode_id': set([t for x in self.message.knowledge_graph.nodes if x.qnode_ids is not None for t in x.qnode_ids])
+                                    }
+        else:
+            allowable_parameters = {'action': {'remove_negated_edges'},
+                                    'remove_connected_nodes': {'true', 'false', 'True', 'False', 't', 'f', 'T', 'F'},
+                                    'qnode_id':{'a specific query node id to remove'}}
+
+        # A little function to describe what this thing does
+        if describe:
+            brief_description = """
+`remove_negated_edges` removes edges from the knowledge graph (KG) if they connect to nodes that also have a negated edge between them.
+
+You have the option (this defaults to false) to either remove all connected nodes to such edges (via `remove_connected_nodes=t`), or
+else, only remove a single source/target node based on a query node id (via `remove_connected_nodes=t, qnode_id=<a query node id.>`.
+This can be applied to an arbitrary knowledge graph as possible node ids are computed dynamically (i.e. not just those created/recognized by the ARA Expander team).
+"""
+            allowable_parameters['brief_description'] = brief_description
+            return allowable_parameters
+
+        # Make sure only allowable parameters and values have been passed
+        resp = self.check_params(allowable_parameters)
+        # return if bad parameters have been passed
+        if self.response.status != 'OK' or resp == -1:
+            return self.response
+
+
+        edge_params = self.parameters
+
+        if 'remove_connected_nodes' in edge_params:
+            value = edge_params['remove_connected_nodes']
+            if value in {'true', 'True', 't', 'T'}:
+                edge_params['remove_connected_nodes'] = True
+            elif value in {'false', 'False', 'f', 'F'}:
+                edge_params['remove_connected_nodes'] = False
+            else:
+                self.response.error(
+                    f"Supplied value {value} is not permitted. In parameter remove_connected_nodes, allowable values are: {list(allowable_parameters['remove_connected_nodes'])}",
+                    error_code="UnknownValue")
+        else:
+            edge_params['remove_connected_nodes'] = False
+
+        if self.response.status != 'OK':
+            return self.response
+
+        # now do the call out to NGD
+        from Filter_KG.remove_edges import RemoveEdges
+        RE = RemoveEdges(self.response, self.message, edge_params)
+        response = RE.remove_negated_edges()
         return response
 
 ##########################################################################################
