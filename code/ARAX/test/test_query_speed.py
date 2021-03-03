@@ -202,5 +202,16 @@ def test_two_hop_2():
     nodes_by_qg_id, edges_by_qg_id = _run_query_and_do_standard_testing(actions_list)
 
 
+def test_one_hop_aceta_with_predicate():
+    actions_list = [
+        "add_qnode(id=CHEMBL.COMPOUND:CHEMBL112, key=n00)",
+        "add_qnode(key=n01, category=biolink:Protein)",
+        "add_qedge(subject=n00, object=n01, key=e00, predicate=physically_interacts_with)",
+        "expand(kp=ARAX/KG2)",
+        "return(message=true, store=false)",
+    ]
+    nodes_by_qg_id, edges_by_qg_id = _run_query_and_do_standard_testing(actions_list)
+
+
 if __name__ == "__main__":
     pytest.main(['-v', 'test_query_speed.py'])
