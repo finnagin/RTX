@@ -233,6 +233,7 @@ class ARAXExpander:
         if message.knowledge_graph is None:
             message.knowledge_graph = KnowledgeGraph(nodes=dict(), edges=dict())
         log = response
+        mode = "RTXKG2"  # TODO: Temporarily force RTXKG2 mode for testing query speed
 
         # If this is a query for the KG2 API, ignore all option_group_id and exclude properties (only does one-hop)
         if mode == "RTXKG2":

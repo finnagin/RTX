@@ -1,10 +1,13 @@
 #!/bin/env python3
+import csv
 import sys
 import os
+import time
 import traceback
 import ast
-from typing import List, Dict, Tuple
+from typing import List, Dict, Tuple, Union
 
+import requests
 from neo4j import GraphDatabase
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
@@ -80,16 +83,41 @@ class KG2Querier:
         cypher_query = self._convert_one_hop_query_graph_to_cypher_query(query_graph, enforce_directionality, kg_name, log)
         if log.status != 'OK':
             return final_kg, edge_to_nodes_map
+        neo4j_start = time.time()
         neo4j_results = self._answer_query_using_neo4j(cypher_query, qedge_key, kg_name, log)
+        neo4j_time = time.time() - neo4j_start
+        new_db_start = time.time()
+        new_db_answer = self._answer_query_using_new_db(query_graph)
+        new_db_time = time.time() - new_db_start
+
         if log.status != 'OK':
             return final_kg, edge_to_nodes_map
         final_kg, edge_to_nodes_map = self._load_answers_into_kg(neo4j_results, kg_name, query_graph, log)
         if log.status != 'OK':
             return final_kg, edge_to_nodes_map
 
+        if kg_name == "KG2c":
+            qedge = query_graph.edges[qedge_key]
+            subject_qnode = query_graph.nodes[qedge.subject]
+            object_qnode = query_graph.nodes[qedge.object]
+            num_subject_curies = len(eu.convert_string_or_list_to_list(subject_qnode.id))
+            num_object_curies = len(eu.convert_string_or_list_to_list(object_qnode.id))
+            num_neo4j_nodes = 0
+            for qnode_key, nodes in final_kg.nodes_by_qg_id.items():
+                num_neo4j_nodes += len(nodes)
+            num_new_db_nodes = 0
+            for qnode_key, nodes in new_db_answer["nodes"].items():
+                num_new_db_nodes += len(nodes)
+            num_neo4j_edges = len(final_kg.edges_by_qg_id[qedge_key])
+            num_new_db_edges = len(new_db_answer["edges"][qedge_key])
+            row = [num_subject_curies, subject_qnode.category, qedge.predicate, num_object_curies, object_qnode.category,
+                   neo4j_time, new_db_time, num_neo4j_nodes, num_new_db_nodes, num_neo4j_edges, num_new_db_edges]
+            with open(f"query_times.csv", "a") as times_file:
+                writer = csv.writer(times_file)
+                writer.writerow(row)
+
         # TODO: remove this patch once we switch to KG2.5.0!
         eu.convert_node_and_edge_types_to_new_format(final_kg)
-
         return final_kg, edge_to_nodes_map
 
     def answer_single_node_query(self, single_node_qg: QueryGraph) -> QGOrganizedKnowledgeGraph:
@@ -191,11 +219,16 @@ class KG2Querier:
     def _answer_query_using_neo4j(self, cypher_query: str, qedge_key: str, kg_name: str, log: ARAXResponse) -> List[Dict[str, List[Dict[str, any]]]]:
         log.info(f"Sending cypher query for edge {qedge_key} to {kg_name} neo4j")
         results_from_neo4j = self._run_cypher_query(cypher_query, kg_name, log)
-        if log.status == 'OK':
-            columns_with_lengths = dict()
-            for column in results_from_neo4j[0]:
-                columns_with_lengths[column] = len(results_from_neo4j[0].get(column))
         return results_from_neo4j
+
+    @staticmethod
+    def _answer_query_using_new_db(qg: QueryGraph) -> Dict[str, Dict[str, Dict[str, Dict[str, Union[List[str], str, None]]]]]:
+        response = requests.post("http://localhost:2244/query", json=qg.to_dict(), headers={'accept': 'application/json'})
+        if response.status_code == 200:
+            return response.json()
+        else:
+            print(f"Response status code was {response.status_code}. Response was: {response.text}")
+            return dict()
 
     def _load_answers_into_kg(self, neo4j_results: List[Dict[str, List[Dict[str, any]]]], kg_name: str,
                               qg: QueryGraph, log: ARAXResponse) -> Tuple[QGOrganizedKnowledgeGraph, Dict[str, Dict[str, str]]]:
