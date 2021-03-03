@@ -132,6 +132,17 @@ def _check_counts_of_curie_qnodes(nodes_by_qg_id: Dict[str, Dict[str, Node]], qu
             assert 1 <= len(nodes_by_qg_id[qnode_key]) <= len(qnode.id)
 
 
+def test_one_hop_aceta():
+    actions_list = [
+        "add_qnode(id=CHEMBL.COMPOUND:CHEMBL112, key=n00)",
+        "add_qnode(key=n01, category=biolink:Protein)",
+        "add_qedge(subject=n00, object=n01, key=e00)",
+        "expand(kp=ARAX/KG2)",
+        "return(message=true, store=false)",
+    ]
+    nodes_by_qg_id, edges_by_qg_id = _run_query_and_do_standard_testing(actions_list)
+
+
 def test_one_hop_to_any_node():
     actions_list = [
         "add_qnode(id=REACT:R-HSA-2160456, key=n00)",
