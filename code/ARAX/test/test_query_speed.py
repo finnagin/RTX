@@ -213,5 +213,27 @@ def test_one_hop_aceta_with_predicate():
     nodes_by_qg_id, edges_by_qg_id = _run_query_and_do_standard_testing(actions_list)
 
 
+def test_curie_to_curie():
+    actions_list = [
+        "add_qnode(id=CHEMBL.COMPOUND:CHEMBL25, key=n00)",
+        "add_qnode(id=CHEMBL.COMPOUND:CHEMBL833, key=n01)",
+        "add_qedge(subject=n00, object=n01, key=e00)",
+        "expand(kp=ARAX/KG2)",
+        "return(message=true, store=false)",
+    ]
+    nodes_by_qg_id, edges_by_qg_id = _run_query_and_do_standard_testing(actions_list)
+
+
+def test_many_curie_to_many_curie():
+    actions_list = [
+        "add_qnode(id=[CHEMBL.COMPOUND:CHEMBL25,CHEBI:5855], key=n00)",
+        "add_qnode(id=CHEMBL.COMPOUND:CHEMBL112, key=n01)",
+        "add_qedge(subject=n00, object=n01, key=e00)",
+        "expand(kp=ARAX/KG2)",
+        "return(message=true, store=false)",
+    ]
+    nodes_by_qg_id, edges_by_qg_id = _run_query_and_do_standard_testing(actions_list)
+
+
 if __name__ == "__main__":
     pytest.main(['-v', 'test_query_speed.py'])
