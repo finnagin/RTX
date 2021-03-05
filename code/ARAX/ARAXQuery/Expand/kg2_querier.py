@@ -278,8 +278,6 @@ class KG2Querier:
         other_properties = ["provided_by", "publications", "negated", "relation_curie", "simplified_relation_curie",
                             "simplified_relation", "edge_label"]
         swagger_edge.attributes = self._create_swagger_attributes(other_properties, neo4j_edge)
-        is_defined_by_attribute = Attribute(name="is_defined_by", value="ARAX/KG2", type=eu.get_attribute_type("is_defined_by"))
-        swagger_edge.attributes.append(is_defined_by_attribute)
         return swagger_edge_key, swagger_edge
 
     def _convert_kg2c_edge_to_swagger_edge(self, neo4j_edge: Dict[str, any]) -> Tuple[str, Edge]:
@@ -290,8 +288,6 @@ class KG2Querier:
         swagger_edge.object = neo4j_edge.get("object")
         other_properties = ["provided_by", "publications"]
         swagger_edge.attributes = self._create_swagger_attributes(other_properties, neo4j_edge)
-        is_defined_by_attribute = Attribute(name="is_defined_by", value="ARAX/KG2c", type=eu.get_attribute_type("is_defined_by"))
-        swagger_edge.attributes.append(is_defined_by_attribute)
         return swagger_edge_key, swagger_edge
 
     def _convert_kg1_edge_to_swagger_edge(self, neo4j_edge: Dict[str, any], node_uuid_to_curie_dict: Dict[str, str]) -> Tuple[str, Edge]:
@@ -303,8 +299,6 @@ class KG2Querier:
         swagger_edge.relation = neo4j_edge.get("relation")
         other_properties = ["provided_by", "probability"]
         swagger_edge.attributes = self._create_swagger_attributes(other_properties, neo4j_edge)
-        is_defined_by_attribute = Attribute(name="is_defined_by", value="ARAX/KG1", type=eu.get_attribute_type("is_defined_by"))
-        swagger_edge.attributes.append(is_defined_by_attribute)
         return swagger_edge_key, swagger_edge
 
     @staticmethod
@@ -312,26 +306,26 @@ class KG2Querier:
         new_attributes = []
         for property_name in property_names:
             property_value = neo4j_object.get(property_name)
-            # Extract any lists, dicts, and booleans that are stored within strings
-            if type(property_value) is str:
-                if (property_value.startswith('[') and property_value.endswith(']')) or \
-                        (property_value.startswith('{') and property_value.endswith('}')) or \
-                        property_value.lower() == "true" or property_value.lower() == "false":
+            # We'll call the 'provided_by' property 'original_source' instead
+            property_name = "original_source" if property_name == "provided_by" else property_name
+            # Extract any booleans that are stored within strings
+            if isinstance(property_value, str):
+                if property_value.lower() == "true" or property_value.lower() == "false":
                     property_value = ast.literal_eval(property_value)
-                    if isinstance(property_value, list):
-                        property_value.sort()  # Alphabetize lists
+            elif isinstance(property_value, list):
+                property_value.sort()  # Alphabetize lists
 
             # Create an Attribute for all non-empty values
             if property_value is not None and property_value != {} and property_value != []:
-                swagger_attribute = Attribute()
-                swagger_attribute.name = property_name
-                swagger_attribute.type = eu.get_attribute_type(swagger_attribute.name)
+                attribute = Attribute()
+                attribute.name = property_name
+                attribute.type = eu.get_attribute_type(attribute.name)
                 # Figure out whether this is a url and store it appropriately
                 if type(property_value) is str and (property_value.startswith("http:") or property_value.startswith("https:")):
-                    swagger_attribute.url = property_value
+                    attribute.url = property_value
                 else:
-                    swagger_attribute.value = property_value
-                new_attributes.append(swagger_attribute)
+                    attribute.value = property_value
+                new_attributes.append(attribute)
         return new_attributes
 
     @staticmethod

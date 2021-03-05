@@ -156,8 +156,8 @@ class BTEQuerier:
                 swagger_edge.predicate = edge.get('type')
                 swagger_edge.subject = remapped_node_keys.get(edge.get('source_id'), edge.get('source_id'))
                 swagger_edge.object = remapped_node_keys.get(edge.get('target_id'), edge.get('target_id'))
-                swagger_edge.attributes = [Attribute(name="provided_by", value=edge.get('edge_source'), type=eu.get_attribute_type("provided_by")),
-                                           Attribute(name="is_defined_by", value="BTE", type=eu.get_attribute_type("is_defined_by"))]
+                swagger_edge.attributes = [Attribute(name="original_source", value=edge.get('edge_source'), type=eu.get_attribute_type("original_source")),
+                                           Attribute(name="knowledge_provider", value="BTE", type=eu.get_attribute_type("knowledge_provider"))]
                 # Map the returned BTE qg_id back to the original qedge_key in our query graph
                 bte_qg_id = kg_to_qg_ids_dict['edges'].get(swagger_edge_key)
                 if bte_qg_id != "e1":
