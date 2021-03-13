@@ -1,11 +1,13 @@
 #!/bin/env python3
 import csv
+import json
+import sqlite3
 import sys
 import os
 import time
 import traceback
 import ast
-from typing import List, Dict, Tuple, Union
+from typing import List, Dict, Tuple, Union, Set
 
 import requests
 from neo4j import GraphDatabase
@@ -30,6 +32,9 @@ class KG2Querier:
         self.response = response_object
         self.enforce_directionality = self.response.data['parameters'].get('enforce_directionality')
         self.use_synonyms = self.response.data['parameters'].get('use_synonyms')
+        path_list = os.path.realpath(__file__).split(os.path.sep)
+        rtx_index = path_list.index("RTX")
+        self.kg2c_db_path = os.path.sep.join([*path_list[:(rtx_index + 1)], 'code', 'ARAX', 'KnowledgeSources', 'KG2c', 'kg2c.sqlite'])
         if input_kp == "ARAX/KG2":
             if self.use_synonyms:
                 self.kg_name = "KG2c"
@@ -85,14 +90,15 @@ class KG2Querier:
             return final_kg, edge_to_nodes_map
         neo4j_start = time.time()
         neo4j_results = self._answer_query_using_neo4j(cypher_query, qedge_key, kg_name, log)
-        neo4j_time = time.time() - neo4j_start
-        new_db_start = time.time()
-        new_db_answer = self._answer_query_using_new_db(query_graph)
-        new_db_time = time.time() - new_db_start
-
         if log.status != 'OK':
             return final_kg, edge_to_nodes_map
         final_kg, edge_to_nodes_map = self._load_answers_into_kg(neo4j_results, kg_name, query_graph, log)
+        neo4j_time = time.time() - neo4j_start
+        new_db_start = time.time()
+        new_db_answer = self._answer_query_using_new_db(query_graph)
+        new_db_kg = self._grab_matching_nodes_and_edges(new_db_answer, kg_name, log)
+        new_db_time = time.time() - new_db_start
+
         if log.status != 'OK':
             return final_kg, edge_to_nodes_map
 
@@ -106,10 +112,10 @@ class KG2Querier:
             for qnode_key, nodes in final_kg.nodes_by_qg_id.items():
                 num_neo4j_nodes += len(nodes)
             num_new_db_nodes = 0
-            for qnode_key, nodes in new_db_answer["nodes"].items():
+            for qnode_key, nodes in new_db_kg.nodes_by_qg_id.items():
                 num_new_db_nodes += len(nodes)
             num_neo4j_edges = len(final_kg.edges_by_qg_id[qedge_key])
-            num_new_db_edges = len(new_db_answer["edges"][qedge_key])
+            num_new_db_edges = len(new_db_kg.edges_by_qg_id[qedge_key])
             row = [num_subject_curies, subject_qnode.category, qedge.predicate, num_object_curies, object_qnode.category,
                    neo4j_time, new_db_time, num_neo4j_nodes, num_new_db_nodes, num_neo4j_edges, num_new_db_edges]
             with open(f"query_times.csv", "a") as times_file:
@@ -210,7 +216,7 @@ class KG2Querier:
         return results_from_neo4j
 
     @staticmethod
-    def _answer_query_using_new_db(qg: QueryGraph) -> Dict[str, Dict[str, Dict[str, Dict[str, Union[List[str], str, None]]]]]:
+    def _answer_query_using_new_db(qg: QueryGraph) -> Dict[str, Dict[str, Set[Union[str, int]]]]:
         response = requests.post("http://buildkg2c.rtx.ai:5000/query", json=qg.to_dict(), headers={'accept': 'application/json'})
         if response.status_code == 200:
             return response.json()
@@ -250,6 +256,40 @@ class KG2Querier:
                     final_kg.add_edge(swagger_edge_key, swagger_edge, column_qedge_key)
 
         return final_kg, edge_to_nodes_map
+
+    def _grab_matching_nodes_and_edges(self, new_db_answer: Dict[str, Dict[str, Set[Union[str, int]]]], kp: str, log: ARAXResponse) -> QGOrganizedKnowledgeGraph:
+        answer_kg = QGOrganizedKnowledgeGraph()
+        connection = sqlite3.connect(self.kg2c_db_path)
+        cursor = connection.cursor()
+        # Grab the node objects from sqlite corresponding to the returned node IDs
+        for qnode_key, node_keys in new_db_answer["nodes"].items():
+            node_keys_str = "','".join(node_keys)  # SQL wants ('node1', 'node2') format for string lists
+            sql_query = f"SELECT N.node " \
+                        f"FROM nodes AS N " \
+                        f"WHERE N.id IN ('{node_keys_str}')"
+            log.debug(f"Looking up returned {qnode_key} node IDs in KG2c sqlite")
+            cursor.execute(sql_query)
+            rows = cursor.fetchall()
+            for row in rows:
+                node_as_dict = json.loads(row[0])
+                node_key, node = self._convert_neo4j_node_to_swagger_node(node_as_dict, kp)
+                answer_kg.add_node(node_key, node, qnode_key)
+        # Grab the edge objects from sqlite corresponding to the returned edge IDs
+        for qedge_key, edge_keys in new_db_answer["edges"].items():
+            edge_keys_str = ",".join(str(edge_key) for edge_key in edge_keys)  # SQL wants (1, 2) format int lists
+            sql_query = f"SELECT E.edge " \
+                        f"FROM edges AS E " \
+                        f"WHERE E.id IN ({edge_keys_str})"
+            log.debug(f"Looking up returned {qedge_key} edge IDs in KG2c sqlite")
+            cursor.execute(sql_query)
+            rows = cursor.fetchall()
+            for row in rows:
+                edge_as_dict = json.loads(row[0])
+                edge_key, edge = self._convert_neo4j_edge_to_swagger_edge(edge_as_dict, dict(), kp)
+                answer_kg.add_edge(edge_key, edge, qedge_key)
+        cursor.close()
+        connection.close()
+        return answer_kg
 
     def _convert_neo4j_node_to_swagger_node(self, neo4j_node: Dict[str, any], kp: str) -> Tuple[str, Node]:
         if kp == "KG2":
