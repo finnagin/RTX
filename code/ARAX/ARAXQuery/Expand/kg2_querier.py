@@ -100,8 +100,8 @@ class KG2Querier:
             qedge = query_graph.edges[qedge_key]
             subject_qnode = query_graph.nodes[qedge.subject]
             object_qnode = query_graph.nodes[qedge.object]
-            num_subject_curies = len(eu.convert_string_or_list_to_list(subject_qnode.id))
-            num_object_curies = len(eu.convert_string_or_list_to_list(object_qnode.id))
+            num_subject_curies = len(eu.convert_to_list(subject_qnode.id))
+            num_object_curies = len(eu.convert_to_list(object_qnode.id))
             num_neo4j_nodes = 0
             for qnode_key, nodes in final_kg.nodes_by_qg_id.items():
                 num_neo4j_nodes += len(nodes)
@@ -211,7 +211,7 @@ class KG2Querier:
 
     @staticmethod
     def _answer_query_using_new_db(qg: QueryGraph) -> Dict[str, Dict[str, Dict[str, Dict[str, Union[List[str], str, None]]]]]:
-        response = requests.post("http://localhost:2244/query", json=qg.to_dict(), headers={'accept': 'application/json'})
+        response = requests.post("http://buildkg2c.rtx.ai:5000/query", json=qg.to_dict(), headers={'accept': 'application/json'})
         if response.status_code == 200:
             return response.json()
         else:
