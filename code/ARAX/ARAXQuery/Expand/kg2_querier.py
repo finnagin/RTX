@@ -262,6 +262,8 @@ class KG2Querier:
         connection = sqlite3.connect(self.kg2c_db_path)
         cursor = connection.cursor()
         # Grab the node objects from sqlite corresponding to the returned node IDs
+        num_nodes = sum([len(nodes) for nodes in new_db_answer["nodes"].values()])
+        start = time.time()
         for qnode_key, node_keys in new_db_answer["nodes"].items():
             node_keys_str = "','".join(node_keys)  # SQL wants ('node1', 'node2') format for string lists
             sql_query = f"SELECT N.node " \
@@ -274,7 +276,10 @@ class KG2Querier:
                 node_as_dict = json.loads(row[0])
                 node_key, node = self._convert_neo4j_node_to_swagger_node(node_as_dict, kp)
                 answer_kg.add_node(node_key, node, qnode_key)
+        log.debug(f"Grabbing {num_nodes} nodes from sqlite took {time.time() - start} seconds")
         # Grab the edge objects from sqlite corresponding to the returned edge IDs
+        num_edges = sum([len(edges) for edges in new_db_answer["edges"].values()])
+        start = time.time()
         for qedge_key, edge_keys in new_db_answer["edges"].items():
             edge_keys_str = ",".join(str(edge_key) for edge_key in edge_keys)  # SQL wants (1, 2) format int lists
             sql_query = f"SELECT E.edge " \
@@ -287,6 +292,7 @@ class KG2Querier:
                 edge_as_dict = json.loads(row[0])
                 edge_key, edge = self._convert_neo4j_edge_to_swagger_edge(edge_as_dict, dict(), kp)
                 answer_kg.add_edge(edge_key, edge, qedge_key)
+        log.debug(f"Grabbing {num_edges} edges from sqlite took {time.time() - start} seconds")
         cursor.close()
         connection.close()
         return answer_kg
